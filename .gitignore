@@ -1,0 +1,23 @@
+# Write any file that you want to exclude from the repo here
+
+# Documents
+
+
+# Executables
+
+
+
+# Environment
+
+
+
+# Scripts
+
+
+
+# Misc
+
+
+# Temporary
+backend/
+frontend/
