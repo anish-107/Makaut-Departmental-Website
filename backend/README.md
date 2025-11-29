@@ -1,40 +1,41 @@
-# **Frontend**
-> TODO : Add a bit of information regarding frontend.
+# **Backend**
+
+> TODO : Add a bit of information regarding backend.
 
 ---
 
 ## **Introduction**
-> TODO : Basic Control Flow and Data Flow
+> TODO : Basic Introduction to this directory content
 
 ---
 
 ## **File Structure**
 ```plaintext
-Frontend/
+Backend/
 │
-├── node_modules/           # Not available on github (created with `npm install` on local machine).
+├── venv/                   # Not available on github (created with `python -m venv venv` on local machine).
 │   
-├── public/                 # Public assets and static files like images and videos (anything here will be available to all)
+├── res/                    # Any resources if needed
 │
 ├── src/                    # Source Code Folder
 |      |
-|      ├── assets/          # Static assets images, videos but this won't be available to all
+|      ├── ....../          # TODO : Add Later
 |      |
-|      ├── components/      # Reusable Components
+|      ├── ........../      # TODO : Add Later
 |      |            |
-|      |            ├── ui/ # Shadcn Components
+|      |            ├── ../ # TODO : Add Later
 |      |
-|      ├── lib/utils.js     # Created by shadcn
+|      ├── .............    # TODO : Add Later
 |      |
-|      ├── pages/           # Different Pages for the website 
+|      ├── .......          # TODO : Add Later 
 |      |
-|      ├── App.css          # CSS File for App.jsx
+|      ├── .......          # TODO : Add Later
 |      |
-|      ├── App.jsx          # File that will be rendered in main.jsx
+|      ├── .........        # TODO : Add Later
 |      |
-|      ├── index.css        # Base Styles
+|      ├── .........        # TODO : Add Later
 |      |
-|      └── main.jsx         # File that will be rendered in index.html
+|      └── .........        # TODO : Add Later
 |
 |
 ├── scripts/                # Scripts to automate the git & github tasks
@@ -45,58 +46,40 @@ Frontend/
 |
 ├── .gitignore              # List of files to ignore from this directory
 |
-├── components.json         # Created by shadcn
+├── app.py                  # Main file to run the backend
 |
-├── eslint.config.js        # Linting Rules (Code Quality)
+├── requirements.txt        # Dependencies
 |
-├── index.html              # Base HTML Entry Point
-|
-├── jsconfig.json           # Javascript config file
-|
-├── package-lock.json       # Locked Dependencies with their versions (generated/update automatically with `npm install`)
-|
-├── package.json            # Dependencies
-|
-├── README.md               # This file (for basic navigation)
-|
-└── vite.config.js          # Vite Configurations
+└── README.md               # This File (Basic Navigation Guide)
 ```
 
 ---
 ## **Steps to run**
-> Follow these steps steps to run the frontend on your local device
+> Follow these steps steps to run the backend on your local device
 
-### **1. Navigate to the Frontend Directory**
+### **1. Navigate to the Backend Directory**
 
-Open your terminal and move into the frontend folder:
+Open your terminal and move into the backend folder:
 
 ```bash
-cd frontend
+cd backend
 ```
 
 ---
 
 ### **2. Create a `.env` File**
 
-Inside the **frontend** directory, create a `.env` file.
+Inside the **backend** directory, create a `.env` file.
 
 Add the environment variables exactly as mentioned in the documentation (e.g., API URL, keys, etc.).
 
 Example:
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:5000
+HOST="0.0.0.0"
 ```
 
 > Make sure the variable names match the project requirements.
-
----
-
-### **3. Start the Backend**
-
-Before running the frontend, ensure the backend is running properly.
-
-Refer to the **backend documentation** for setup instructions.
 
 ---
 
@@ -105,19 +88,39 @@ Refer to the **backend documentation** for setup instructions.
 Run:
 
 ```bash
-npm install
+python -m venv venv # On Windows
+
+python3 -m venv venv # On Linux
 ```
 
-This will install all required Node modules.
+This will create a virtual environment
+
+> In VS code open `command pallete` and then `select interpreter` and select the python interpreter in `venv/Scripts/python`.
+> Restart the terminal, if `venv` does not start automatically, run :
+
+```bash
+./venv/Scripts/Activate  # On Windows
+
+source venv/bin/activate # On Linux
+```
+
+> If `venv` is activated then prompt will have `(venv)`.
+
+To install dependencies run:
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
 ### **5. Start the Development Server**
 
-Start the frontend:
+Start the backend:
 
 ```bash
-npm run dev
+python app.py # On Windows
+
+python3 app.py # On Linux
 ```
 
 Your app should now be available on:
@@ -128,7 +131,7 @@ http://localhost:PORT   # PORT is mentioned in .env
 
 ---
 
-## **Steps to Contribute**
+## **Steps to Contribute** 
 
 > Follow the below steps to contribute.
 
@@ -212,21 +215,7 @@ These scripts help you quickly set up, run, and push changes without needing to 
 ### **Steps to Use the Automation Scripts**
 
 1. **Initialize your project**
-   Run the pull script to fetch the latest code and sync your repository:
-
-   * Linux/macOS:
-
-     ```bash
-     ./scripts/pull.sh
-     ```
-   * Windows:
-
-     ```powershell
-     powershell -ExecutionPolicy Bypass -File .\scripts\pull.ps1
-     ```
-
-2. **Install dependencies & run the frontend**
-   Use the start script to create `.env` (if missing) and install node modules:
+   Run the start script to fetch the latest code and sync your repository:
 
    * Linux/macOS:
 
@@ -238,6 +227,26 @@ These scripts help you quickly set up, run, and push changes without needing to 
      ```powershell
      powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
      ```
+
+2. **Install dependencies & run the frontend**
+   Use the setup script to create `.env` (if missing) and install node modules:
+
+   * Linux/macOS:
+
+     ```bash
+     ./scripts/setup.sh
+     ```
+   * Windows:
+
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
+     ```
+
+   After this, start the frontend normally:
+
+   ```bash
+   npm run dev
+   ```
 
 3. **Push your changes to GitHub**
    Use the push script to stage, commit, and push your work:
@@ -261,3 +270,4 @@ These scripts help you quickly set up, run, and push changes without needing to 
    * Submit your PR to the main repository
 
 ---
+
