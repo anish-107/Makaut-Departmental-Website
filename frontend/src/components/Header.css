@@ -1,0 +1,38 @@
+.header {
+  background: linear-gradient(135deg, #0057c2, #003b73);
+  color: white;
+  padding: 25px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.header-left h1 {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.header-profile-img {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  object-fit: cover;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-user-name {
+  font-weight: 600;
+}
+
+.header-user-email {
+  font-size: 14px;
+  opacity: 0.9;
+}

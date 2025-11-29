@@ -1,0 +1,24 @@
+.sidebar {
+  width: 220px;
+  background: #1c2b3a; /* dark navy */
+  height: 100vh;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-item {
+  background: #19e3b1;      /* mint-green like your image */
+  color: black;
+  padding: 15px;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  transition: 0.2s;
+}
+
+.sidebar-item:hover {
+  background: #14c89a;  /* darker mint */
+  transform: translateX(5px);
+}
