@@ -5,3 +5,4 @@ venv/
 # Intermediate Files
 __pycache__/
 *.pyc
+**/__pycache__/
