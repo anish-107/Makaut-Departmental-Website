@@ -37,15 +37,17 @@ FlaskReturn = Union[Response, Tuple[Response, int]]
 
 
 # Methods
-def say_hello() -> str:
-    return "Hello, World"
+def members() -> List[str]:
+    members : List[str] = ["Rupam", "Antika", "Neelofer", "Anish", "Dibyasmita", "Sayan", "Deep", "Barnik"]
+    
+    return members
 
 
 # Routes
 @app.route('/')
 def index() -> FlaskReturn:
-    data : Dict[str, str] = {
-        "message" : say_hello()
+    data : Dict[str, List[str]] = {
+        "members" : members()
     }
 
     return jsonify(data)
