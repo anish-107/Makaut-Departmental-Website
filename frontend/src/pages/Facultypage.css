@@ -1,0 +1,17 @@
+.faculty-page {
+  padding: 20px 40px;
+}
+
+.faculty-page-subheader {
+  margin: 20px 0;
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+  color: #003b73;
+}
+
+.faculty-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}

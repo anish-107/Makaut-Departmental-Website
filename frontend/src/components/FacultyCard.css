@@ -1,0 +1,23 @@
+.faculty-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 6px solid #0057c2;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.faculty-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.faculty-card h3 {
+  color: #003b73;
+  margin-bottom: 8px;
+}
+
+.faculty-card p {
+  margin-bottom: 5px;
+  font-size: 14px;
+}
