@@ -10,7 +10,7 @@
 ---
 
 ## **File Structure**
-```TEXT
+```plaintext
 Makaut-Departmental-Website/
 │
 ├── frontend/               # Public-facing website (React + Vite)
