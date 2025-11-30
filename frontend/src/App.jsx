@@ -1,44 +1,48 @@
-/**
- * @author Anish
- * @description This is the the jsx file that is being displayed in main.jsx
- * @date 29-11-2025
- * @returns a JSX page
- */
-
-// Imports
-import "./App.css";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./Components/Sidebar";
 import FacultyPage from "./Pages/FacultyPage";
 import NoticePage from "./Pages/NoticePage";
+import SelectionScreen from "./Pages/SelectionScreen";
+import ResultDetails from "./Pages/ResultDetails";
+import ClassSchedule from "./Pages/ClassSchedule";
+import JobUpdates from "./Pages/JobUpdates";
+import StudentProfile from "./Pages/StudentProfile";
 
-// Constants
-// const API_URL = import.meta.env.VITE_API_URL || "";
+
+import "./App.css";
 
 function App() {
-    return (
-      <>
-        <Router>
-          <div className="app-layout">
+  return (
+    <Router>
+      <div className="app-layout">
+        <Sidebar />
+
+        <div className="main-content">
+          <Routes>
+            {/* Main pages */}
+            <Route path="/faculty" element={<FacultyPage />} />
+            <Route path="/notice" element={<NoticePage />} />
+
+            {/* Result pages */}
+            <Route path="/results" element={<SelectionScreen />} />
+            <Route path="/result-details" element={<ResultDetails />} />
+
+            {/* Class Schedule page */}
+            <Route path="/schedule" element={<ClassSchedule />} />
+
+            {/* Job Updates page */}
+            <Route path="/jobs" element={<JobUpdates />} />
             
-            {/* LEFT SIDEBAR */}
-            <Sidebar />
+            {/* Student Profile page */}
+            <Route path="/student-profile" element={<StudentProfile />} />
 
-            {/* RIGHT SIDE CONTENT */}
-            <div className="main-content">
-              <Routes>
-                <Route path="/faculty" element={<FacultyPage />} />
-                <Route path="/notices" element={<NoticePage />} />
-                {/* Add other pages later */}
-                <Route path="*" element={<FacultyPage />} />
-              </Routes>
-            </div>
-
-          </div>
-        </Router>
-      </>
+            {/* Default */}
+            <Route path="*" element={<h2>404 – Page Not Found</h2>} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 
