@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Header from "../Components/Header";
-import NoticeCard from "../Components/NoticeCard";
+import Header from "../../Components/Header";
+import NoticeCard from "../../Components/NoticeCard";
 import "./NoticePage.css";
 
 const NoticePage = () => {
@@ -21,7 +21,7 @@ const NoticePage = () => {
         date: "2025-11-30",
         description: "Mid-sem exam schedule for IT dept.",
         file_url: "",
-      }
+      },
     ]);
   }, []);
 

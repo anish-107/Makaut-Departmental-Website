@@ -1,8 +1,6 @@
-/**
- * @author Anish 
- * @description This is the root jsx file that will be rendered
+/** main.jsx
+ * @author Anish
  * @date 29-11-2025
- * @returns a JSX page
  */
 
 import { StrictMode } from 'react'
@@ -13,5 +11,5 @@ import App from './App.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 )

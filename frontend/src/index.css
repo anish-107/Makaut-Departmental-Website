@@ -240,3 +240,10 @@ Base CSS File
     @apply bg-background text-foreground;
   }
 }
+
+@media (min-width: 768px) {
+    .hod-container {
+      flex-direction: row !important;
+      align-items: flex-start !important;
+    }
+}
