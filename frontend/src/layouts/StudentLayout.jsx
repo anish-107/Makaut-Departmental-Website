@@ -30,7 +30,7 @@ export default function StudentLayout() {
 
       <button
         onClick={() => setSidebarOpen(true)}
-        className="fixed top-20 left-4 z-30 px-4 py-2 rounded-lg bg-[#0a1628]/95 text-slate-200 shadow-md flex items-center gap-2 border border-white/10 hover:bg-[#0a1628] transition-colors"
+        className="fixed top-20 z-30 px-4 py-2 rounded-lg bg-[#0a1628]/95 text-slate-200 shadow-md flex items-center gap-2 border border-white/10 hover:bg-[#0a1628] transition-colors"
         aria-label="Open sidebar"
       >
         <Menu className="w-5 h-5" />
@@ -52,7 +52,7 @@ export default function StudentLayout() {
       {/* Content Area */}
       <div className="flex flex-1">
         {/* Main Content - Full width since sidebar is overlay */}
-        <main className="flex-1 p-6 pt-20">
+        <main className="flex-1 pt-20">
           <Outlet />
         </main>
       </div>
