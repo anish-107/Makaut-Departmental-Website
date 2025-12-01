@@ -1,9 +1,8 @@
 import React from "react";
-import Header from "../Components/Header";
+import Header from "../../Components/Header";
 import "./JobUpdates.css";
 
 const JobUpdates = () => {
-
   /* ===============================
      1️⃣ UPCOMING COMPANY DRIVES
   =============================== */
@@ -13,15 +12,15 @@ const JobUpdates = () => {
       role: "Software Engineer Intern",
       description: "Work on cloud services, AI modules & backend systems.",
       applyLink: "#",
-      criteriaPDF: "/criteria-microsoft.pdf"
+      criteriaPDF: "/criteria-microsoft.pdf",
     },
     {
       company: "Infosys",
       role: "System Engineer",
       description: "Development & support role. Includes aptitude + coding.",
       applyLink: "#",
-      criteriaPDF: "/criteria-infosys.pdf"
-    }
+      criteriaPDF: "/criteria-infosys.pdf",
+    },
   ];
 
   /* ===============================
@@ -31,13 +30,13 @@ const JobUpdates = () => {
     {
       company: "TCS",
       round: "Technical Round",
-      pdfLink: "/tcs-tech-round-merit.pdf"
+      pdfLink: "/tcs-tech-round-merit.pdf",
     },
     {
       company: "Wipro",
       round: "Aptitude Shortlist",
-      pdfLink: "/wipro-aptitude-merit.pdf"
-    }
+      pdfLink: "/wipro-aptitude-merit.pdf",
+    },
   ];
 
   /* ===============================
@@ -47,29 +46,28 @@ const JobUpdates = () => {
     {
       company: "TCS",
       placed: 12,
-      pdfLink: "/tcs-selected.pdf"
+      pdfLink: "/tcs-selected.pdf",
     },
     {
       company: "Infosys",
       placed: 9,
-      pdfLink: "/infosys-selected.pdf"
+      pdfLink: "/infosys-selected.pdf",
     },
     {
       company: "Accenture",
       placed: 7,
-      pdfLink: "/accenture-selected.pdf"
-    }
+      pdfLink: "/accenture-selected.pdf",
+    },
   ];
 
   return (
     <div className="job-updates-page">
-
       {/* HEADER */}
-      <Header 
+      <Header
         user={{
           name: "John Doe",
           email: "john@example.com",
-          img: "/default-profile.png"
+          img: "/default-profile.png",
         }}
       />
 
@@ -78,7 +76,6 @@ const JobUpdates = () => {
         <span>Student Name – John Doe</span>
         <span>Email – john@example.com</span>
       </div>
-
 
       {/* ======================================================
            1️⃣ UPCOMING COMPANY DRIVES
@@ -89,17 +86,22 @@ const JobUpdates = () => {
         {upcomingCompanies.map((c, i) => (
           <div className="upcoming-card" key={i}>
             <h3>{c.company}</h3>
-            <p><strong>Role:</strong> {c.role}</p>
+            <p>
+              <strong>Role:</strong> {c.role}
+            </p>
             <p>{c.description}</p>
 
             <div className="upcoming-links">
-              <a href={c.applyLink} target="_blank" rel="noopener noreferrer">Apply Now</a>
-              <a href={c.criteriaPDF} target="_blank" rel="noopener noreferrer">View Criteria PDF</a>
+              <a href={c.applyLink} target="_blank" rel="noopener noreferrer">
+                Apply Now
+              </a>
+              <a href={c.criteriaPDF} target="_blank" rel="noopener noreferrer">
+                View Criteria PDF
+              </a>
             </div>
           </div>
         ))}
       </div>
-
 
       {/* ======================================================
            2️⃣ SHORTLIST / MERIT LIST SECTION
@@ -110,15 +112,21 @@ const JobUpdates = () => {
         {meritLists.map((m, i) => (
           <div className="merit-card" key={i}>
             <h3>{m.company}</h3>
-            <p><strong>Round:</strong> {m.round}</p>
+            <p>
+              <strong>Round:</strong> {m.round}
+            </p>
 
-            <a className="merit-link" href={m.pdfLink} target="_blank" rel="noopener noreferrer">
+            <a
+              className="merit-link"
+              href={m.pdfLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View Merit List PDF
             </a>
           </div>
         ))}
       </div>
-
 
       {/* ======================================================
            3️⃣ COMPLETED COMPANY VISITS
@@ -129,15 +137,21 @@ const JobUpdates = () => {
         {completedCompanies.map((c, i) => (
           <div className="completed-card" key={i}>
             <h3>{c.company}</h3>
-            <p><strong>Students Placed:</strong> {c.placed}</p>
+            <p>
+              <strong>Students Placed:</strong> {c.placed}
+            </p>
 
-            <a className="completed-link" href={c.pdfLink} target="_blank" rel="noopener noreferrer">
+            <a
+              className="completed-link"
+              href={c.pdfLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View Selected Students PDF
             </a>
           </div>
         ))}
       </div>
-
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import Header from "../Components/Header";
+import Header from "../../Components/Header";
 import "./ResultPage.css";
 
 const ResultDetails = () => {
@@ -12,7 +12,6 @@ const ResultDetails = () => {
 
   return (
     <div className="result-page">
-
       {/* HEADER */}
       <Header
         user={{
@@ -147,13 +146,16 @@ const ResultDetails = () => {
       {/* RESULT SUMMARY + DOWNLOAD BUTTON */}
       <div className="result-summary">
         <div>
-          <p><strong>Total Credit:</strong> 18</p>
-          <p><strong>SGPA:</strong> 8.85</p>
+          <p>
+            <strong>Total Credit:</strong> 18
+          </p>
+          <p>
+            <strong>SGPA:</strong> 8.85
+          </p>
         </div>
 
         <button className="download-btn">Download Result</button>
       </div>
-
     </div>
   );
 };

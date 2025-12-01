@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Header from "../Components/Header";
-import FacultyCard from "../Components/FacultyCard";
+import Header from "../../Components/Header";
+import FacultyCard from "../../Components/FacultyCard";
 import "./Facultypage.css";
 
 const FacultyPage = () => {
