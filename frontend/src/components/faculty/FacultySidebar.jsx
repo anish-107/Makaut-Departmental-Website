@@ -44,7 +44,6 @@ export default function FacultySidebar() {
     { name: "Notices", to: "/faculty/notices", icon: Bell },
     { name: "Schedule", to: "/faculty/schedule", icon: Calendar },
     { name: "Students", to: "/faculty/students", icon: School },
-    { name: "Results", to: "/faculty/results", icon: Award },
     { name: "Events", to: "/faculty/events", icon: PartyPopper },
     { name: "Job Updates", to: "/faculty/jobs", icon: Briefcase },
   ];

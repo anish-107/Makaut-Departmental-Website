@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, cast
 from os import getenv
 from dotenv import load_dotenv
+from datetime import datetime 
 import pymysql
 
 load_dotenv()
@@ -980,3 +981,50 @@ def verify_user(login_id: str, password: str) -> Optional[Dict[str, Any]]:
     if user.get("password") == password:
         return user
     return None
+
+
+def add_token_to_blocklist(jti: str, expires_at: Optional[str] = None) -> bool:
+    """
+    Insert a refresh token jti into blocklist.
+    expires_at: optional datetime string (MySQL DATETIME) when token naturally expires.
+    Returns True on success.
+    """
+    conn: Optional[pymysql.connections.Connection] = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO token_blocklist (jti, expires_at) VALUES (%s, %s)",
+                (jti, expires_at),
+            )
+            conn.commit()
+            return True
+    except Exception as exc:
+        if conn:
+            conn.rollback()
+        print("[ERROR] add_token_to_blocklist:", exc)
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+def is_token_revoked(jti: str) -> bool:
+    """
+    Check if a token jti is in the blocklist.
+    Returns True if revoked.
+    """
+    conn: Optional[pymysql.connections.Connection] = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM token_blocklist WHERE jti=%s LIMIT 1", (jti,))
+            row = cur.fetchone()
+            return row is not None
+    except Exception as exc:
+        print("[ERROR] is_token_revoked:", exc)
+        # safer to treat token as revoked on DB error
+        return True
+    finally:
+        if conn:
+            conn.close()

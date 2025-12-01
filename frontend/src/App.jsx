@@ -69,14 +69,18 @@ const StudentProfile = lazy(() => import('./pages/student/StudentProfile'))
 const StudentEvent = lazy(() => import('./pages/student/StudentEvent'))
 const StudentJob = lazy(() => import('./pages/student/StudentJob'))
 const StudentNotice = lazy(() => import('./pages/student/StudentNotice'))
-const StudentResult = lazy(() => import('./pages/student/StudentResult'))
 const StudentSchedule = lazy(() => import('./pages/student/StudentSchedule'))
-const StudentSubject = lazy(() => import('./pages/student/StudentSubject'))
 
 
 // faculty pages
 const FacultyHome = lazy(() => import('./pages/faculty/FacultyHome'))
 const FacultyProfile = lazy(() => import('./pages/faculty/FacultyProfile'))
+const FacultyEvent = lazy(() => import('./pages/faculty/FacultyEvent'))
+const FacultyJob = lazy(() => import('./pages/faculty/FacultyJob'))
+const FacultyNotice = lazy(() => import('./pages/faculty/FacultyNotice'))
+const FacultySchedule = lazy(() => import('./pages/faculty/FacultySchedule'))
+const FacultyStudents = lazy(() => import('./pages/faculty/FacultyStudents'))
+
 
 export default function App() {
   return (
@@ -92,10 +96,8 @@ export default function App() {
           <Route path="/student" element={<StudentLayout />}>
             <Route index element={<StudentHome />} />
             <Route path="profile" element={<StudentProfile />} />
-            <Route path="notices" element={<StudentProfile />} />
+            <Route path="notices" element={<StudentNotice />} />
             <Route path="schedule" element={<StudentSchedule />} />
-            <Route path="subjects" element={<StudentSubject />} />
-            <Route path="results" element={<StudentResult />} />
             <Route path="events" element={<StudentEvent />} />
             <Route path="jobs" element={<StudentJob />} />
           </Route>
@@ -104,7 +106,11 @@ export default function App() {
           <Route path="/faculty" element={<FacultyLayout />}>
             <Route index element={<FacultyHome />} />
             <Route path="profile" element={<FacultyProfile />} />
-            {/* add more faculty routes here */}
+            <Route path="notices" element={<FacultyNotice />} />
+            <Route path="schedule" element={<FacultySchedule />} />
+            <Route path="students" element={<FacultyStudents />} />
+            <Route path="events" element={<FacultyEvent />} />
+            <Route path="jobs" element={<FacultyJob />} />
           </Route>
 
           {/* 404 fallback - keep a simple one */}

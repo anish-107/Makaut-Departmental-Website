@@ -6,37 +6,59 @@
  */
 
 
-import React from 'react'
-import { Outlet } from 'react-router-dom'
-import StudentSidebar from '@/components/student/StudentSidebar'
-import StudentHeader from '@/components/student/StudentHeader';
-import StudentFooter from "@/components/student/StudentFooter";
-
+import { useState, useEffect } from "react"
+import { Outlet } from "react-router-dom"
+import { Menu, X } from "lucide-react"
+import StudentSidebar from "@/components/student/StudentSidebar"
+import StudentHeader from "@/components/student/StudentHeader"
+import StudentFooter from "@/components/student/StudentFooter"
 
 export default function StudentLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? "hidden" : "auto"
+    return () => {
+      document.body.style.overflow = "auto"
+    }
+  }, [sidebarOpen])
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      
       {/* Header */}
       <StudentHeader />
 
-      {/* Content Area → Sidebar + Main */}
-      <div className="flex flex-1">
-        
-        {/* Sidebar (Left) */}
-        <aside className="w-64 bg-white border-r">
-          <StudentSidebar />
-        </aside>
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="fixed top-20 left-4 z-30 px-4 py-2 rounded-lg bg-[#0a1628]/95 text-slate-200 shadow-md flex items-center gap-2 border border-white/10 hover:bg-[#0a1628] transition-colors"
+        aria-label="Open sidebar"
+      >
+        <Menu className="w-5 h-5" />
+        <span className="hidden sm:inline">Menu</span>
+      </button>
 
-        {/* Main Content (Right) */}
-        <main className="flex-1 p-6">
+      <StudentSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      {sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="fixed top-4 left-[17rem] z-50 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+          aria-label="Close sidebar"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
+
+      {/* Content Area */}
+      <div className="flex flex-1">
+        {/* Main Content - Full width since sidebar is overlay */}
+        <main className="flex-1 p-6 pt-20">
           <Outlet />
         </main>
       </div>
 
       {/* Footer */}
       <StudentFooter />
-
     </div>
-  );
+  )
 }
