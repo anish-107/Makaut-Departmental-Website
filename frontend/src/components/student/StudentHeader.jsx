@@ -135,8 +135,6 @@ export default function StudentHeader({ user }) {
                   </svg>
                   <span className="hidden sm:inline">Logout</span>
                 </button>
-
-
               </div>
             </div>
           </div>
