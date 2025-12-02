@@ -1,27 +1,32 @@
-/**
+/** AdminSidebar.jsx
  * @author Anish
- * @description Student Sidebar
- * @date 30-11-2025
+ * @description This is the Sidebar Component for the admin panel
+ * @date 2/12/2025
+ * @returns a jsx component
  */
 
-import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, User, Bell, Calendar, PartyPopper, Briefcase, GraduationCap } from "lucide-react"
 
-export default function StudentSidebar({ open, onClose, user }) {
+
+import { Link, useLocation } from "react-router-dom"
+import { LayoutDashboard, User, Bell, Calendar, PartyPopper, Briefcase, GraduationCap, School } from "lucide-react"
+
+export default function AdminSidebar({ open, onClose, user }) {
   const { pathname } = useLocation()
 
   const isActive = (path) => {
-    if (path === "/student") return pathname === "/student"
+    if (path === "/admin") return pathname === "/admin"
     return pathname?.startsWith(path)
   }
 
   const menu = [
-    { name: "Dashboard", to: "/student", icon: LayoutDashboard },
-    { name: "Profile", to: "/student/profile", icon: User },
-    { name: "Notices", to: "/student/notices", icon: Bell },
-    { name: "Schedule", to: "/student/schedule", icon: Calendar },
-    { name: "Events", to: "/student/events", icon: PartyPopper },
-    { name: "Job Updates", to: "/student/jobs", icon: Briefcase },
+    { name: "Dashboard", to: "/admin", icon: LayoutDashboard },
+    { name: "Profile", to: "/admin/profile", icon: User },
+    { name: "Students", to: "/admin/students", icon: GraduationCap },
+    { name: "Faculty", to: "/admin/faculty", icon: School },
+    { name: "Notices", to: "/admin/notices", icon: Bell },
+    { name: "Schedule", to: "/admin/schedule", icon: Calendar },
+    { name: "Events", to: "/admin/events", icon: PartyPopper },
+    { name: "Job Updates", to: "/admin/job", icon: Briefcase },
   ]
 
   return (
@@ -82,7 +87,7 @@ export default function StudentSidebar({ open, onClose, user }) {
           </div>
           <div>
             <p className="text-slate-400 text-xs">Logged in as</p>
-            <p className="text-white text-sm font-semibold">{user?.name || "Student"}</p>
+            <p className="text-white text-sm font-semibold">{user?.name || "Superadmin"}</p>
           </div>
         </div>
       </aside>

@@ -1,32 +1,33 @@
-/**
+/** StudentLayout.jsx
  * @author Anish
  * @description This is the layout file for Student Section
  * @date 30-11-2025
  * @returns a JSX page
  */
 
-
-import { useState, useEffect } from "react"
-import { Outlet } from "react-router-dom"
-import { Menu, X } from "lucide-react"
-import StudentSidebar from "@/components/student/StudentSidebar"
-import StudentHeader from "@/components/student/StudentHeader"
-import StudentFooter from "@/components/student/StudentFooter"
+import { useState, useEffect } from "react";
+import { Outlet } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import StudentSidebar from "@/components/student/StudentSidebar";
+import StudentHeader from "@/components/student/StudentHeader";
+import StudentFooter from "@/components/student/StudentFooter";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function StudentLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth(); // <--- get user from context
 
   useEffect(() => {
-    document.body.style.overflow = sidebarOpen ? "hidden" : "auto"
+    document.body.style.overflow = sidebarOpen ? "hidden" : "auto";
     return () => {
-      document.body.style.overflow = "auto"
-    }
-  }, [sidebarOpen])
+      document.body.style.overflow = "auto";
+    };
+  }, [sidebarOpen]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <StudentHeader />
+      <StudentHeader user={user} />
 
       <button
         onClick={() => setSidebarOpen(true)}
@@ -37,7 +38,11 @@ export default function StudentLayout() {
         <span className="hidden sm:inline">Menu</span>
       </button>
 
-      <StudentSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <StudentSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        user={user}
+      />
 
       {sidebarOpen && (
         <button
@@ -51,7 +56,6 @@ export default function StudentLayout() {
 
       {/* Content Area */}
       <div className="flex flex-1">
-        {/* Main Content - Full width since sidebar is overlay */}
         <main className="flex-1 pt-20">
           <Outlet />
         </main>
@@ -60,5 +64,5 @@ export default function StudentLayout() {
       {/* Footer */}
       <StudentFooter />
     </div>
-  )
+  );
 }

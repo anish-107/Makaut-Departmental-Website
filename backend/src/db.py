@@ -11,6 +11,7 @@ from os import getenv
 from dotenv import load_dotenv
 from datetime import datetime 
 import pymysql
+import pymysql.cursors
 
 load_dotenv()
 
