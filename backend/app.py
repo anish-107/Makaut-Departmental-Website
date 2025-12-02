@@ -671,7 +671,7 @@ def route_delete_schedule(schedule_id: int) -> FlaskReturn:
 
 
 # -------------------------
-# NOTICES / EVENTS / JOB ROUTES
+# NOTICES 
 # -------------------------
 @app.post("/notice/add")
 @jwt_required()
@@ -742,7 +742,10 @@ def route_delete_notice(notice_id: int) -> FlaskReturn:
     return jsonify({"message": "Notice deleted", "affected_rows": affected}), 200
 
 
-# events
+
+# -------------------------
+# EVENTS 
+# -------------------------
 @app.post("/event/add")
 @jwt_required()
 def route_add_event() -> FlaskReturn:
@@ -806,7 +809,9 @@ def route_delete_event(event_id: int) -> FlaskReturn:
     return jsonify({"message": "Event deleted", "affected_rows": affected}), 200
 
 
-# jobs
+# -------------------------
+# Jobs 
+# -------------------------
 @app.post("/job/add")
 @jwt_required()
 def route_add_job() -> FlaskReturn:

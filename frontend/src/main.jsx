@@ -1,6 +1,8 @@
 /** main.jsx
  * @author Anish
  * @date 29-11-2025
+ * @description this is the main layout file for the app
+ * @returns a jsx page
  */
 
 import { StrictMode } from 'react'

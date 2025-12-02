@@ -1,4 +1,4 @@
-/**
+/** MainLayout.jsx
  * @author Anish
  * @description This is the layout file for Common Section
  * @date 30-11-2025

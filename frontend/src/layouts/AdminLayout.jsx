@@ -1,19 +1,19 @@
-/** FacultyLayout.jsx
+/**
  * @author Anish
- * @description This is the layout file for Faculty Section
- * @date 30-11-2025
- * @returns a JSX page
+ * @description This is the layout file for Admin Panel
+ * @date 2-12-2025
+ * @returns a JSX Layout
  */
 
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import FacultySidebar from "@/components/faculty/FacultySidebar";
-import FacultyHeader from "@/components/faculty/FacultyHeader";
-import FacultyFooter from "@/components/faculty/FacultyFooter";
+import AdminSidebar from "@/components/superadmin/AdminSidebar";
+import AdminHeader from "@/components/superadmin/AdminHeader";
+import AdminFooter from "@/components/superadmin/AdminFooter";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function FacultyLayout() {
+export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
 
@@ -27,7 +27,7 @@ export default function FacultyLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <FacultyHeader user={user} />
+      <AdminHeader user={user} />
 
       <button
         onClick={() => setSidebarOpen(true)}
@@ -38,11 +38,7 @@ export default function FacultyLayout() {
         <span className="hidden sm:inline">Menu</span>
       </button>
 
-      <FacultySidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        user={user}
-      />
+      <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} user={user} />
 
       {sidebarOpen && (
         <button
@@ -62,7 +58,7 @@ export default function FacultyLayout() {
       </div>
 
       {/* Footer */}
-      <FacultyFooter />
+      <AdminFooter />
     </div>
   );
 }

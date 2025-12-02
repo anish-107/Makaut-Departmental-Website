@@ -1,8 +1,8 @@
-/**
+/** AdminHeader.jsx
  * @author Anish
- * @description This is the header component for the faculty section
- * @date 30-11-2025
- * @returns a JSX component
+ * @description This is the Header component for admin panel
+ * @date 2/12/2025
+ * @returns a jsx component 
  */
 
 
@@ -12,8 +12,7 @@ import MakautLogo from "@/assets/common/makaut.png";
 import GuestImg from "@/assets/common/guest.png";
 import { useLogout } from "@/hooks/useLogout";
 
-
-export default function StudentHeader({ user }) {
+export default function AdminHeader({ user }) {
   const profileImg = user?.img || GuestImg;
   const logout = useLogout();
 
@@ -112,14 +111,14 @@ export default function StudentHeader({ user }) {
 
                   <div className="hidden md:flex flex-col min-w-0 ml-3">
                     <span className="text-white text-sm font-medium truncate max-w-[120px]">
-                      {user?.name || "Faculty Name"}
+                      {user?.name || "Superadmin"}
                     </span>
                     <span className="text-slate-400 text-xs truncate max-w-[120px]">
-                      {user?.email || "Faculty Email"}
+                      {user?.email || "Superadmin Email"}
                     </span>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={logout}
                   className="ml-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 px-4 py-2 text-white text-xs sm:text-sm font-medium shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 cursor-pointer"

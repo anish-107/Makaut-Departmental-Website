@@ -5,15 +5,18 @@
  * @returns a JSX component
  */
 
-// TODO : Will Need to Make Sure this works after login and register
 
 import React from "react";
 import { Link } from "react-router-dom";
 import MakautLogo from "@/assets/common/makaut.png";
 import GuestImg from "@/assets/common/guest.png";
+import { useLogout } from "@/hooks/useLogout";
+
 
 export default function StudentHeader({ user }) {
   const profileImg = user?.img || GuestImg;
+  const logout = useLogout();
+
 
   return (
     <header className="w-full" aria-label="Department header">
@@ -117,6 +120,23 @@ export default function StudentHeader({ user }) {
                     </span>
                   </div>
                 </div>
+                
+                <button
+                  onClick={logout}
+                  className="ml-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 px-4 py-2 text-white text-xs sm:text-sm font-medium shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105 cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 8l4 4m0 0l-4 4m4-4H3m9 4v1a3 3 0 003 3h2a3 3 0 003-3V7a3 3 0 00-3-3h-2a3 3 0 00-3 3v1"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+
+
               </div>
             </div>
           </div>
