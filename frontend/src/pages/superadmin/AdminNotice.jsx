@@ -5,407 +5,322 @@
  * @returns a JSX Layout
  */
 
-import React, { useEffect, useState } from "react";
+/**
+ * AdminNotices.jsx - Standalone CRUD Page
+ * Fully functional: List + Add + Edit + Delete
+ * Works with your existing backend routes
+ */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+import React, { useEffect, useState } from "react";
+import { PlusCircle, Pencil, Trash2, X } from "lucide-react";
+import { getAccessCsrfToken } from "@/utils/csrf";
+import { useAuth } from "@/hooks/useAuth";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8080";
 
 export default function AdminNotice() {
+  const { user } = useAuth();
+
   const [notices, setNotices] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const [form, setForm] = useState({ title: "", content: "" });
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingNotice, setEditingNotice] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
-  // Fetch all notices on mount
-  useEffect(() => {
-    fetchNotices();
-  }, []);
+  // form fields
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
-  async function fetchNotices() {
+  // delete confirmation
+  const [deleteId, setDeleteId] = useState(null);
+
+  // -----------------------------
+  // FETCH ALL NOTICES
+  // -----------------------------
+  async function loadNotices() {
     try {
       setLoading(true);
-      setError("");
-
-      const res = await fetch(`${API_BASE_URL}/notice/all`, {
-        method: "GET",
-        credentials: "include", 
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to fetch notices: ${res.status}`);
-      }
-
+      const res = await fetch(`${API_BASE_URL}/notice/all`);
       const data = await res.json();
       setNotices(data || []);
     } catch (err) {
-      console.error(err);
-      setError(err.message || "Failed to load notices.");
+      console.error("Failed to fetch notices", err);
     } finally {
       setLoading(false);
     }
   }
 
-  function resetForm() {
-    setForm({ title: "", content: "" });
-    setIsEditing(false);
-    setEditingNotice(null);
+  useEffect(() => {
+    loadNotices();
+  }, []);
+
+  // -----------------------------
+  // OPEN ADD MODAL
+  // -----------------------------
+  function openAddModal() {
+    setEditMode(false);
+    setSelectedId(null);
+    setTitle("");
+    setContent("");
+    setModalOpen(true);
   }
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  // -----------------------------
+  // OPEN EDIT MODAL
+  // -----------------------------
+  function openEditModal(item) {
+    setEditMode(true);
+    setSelectedId(item.notice_id);
+    setTitle(item.title);
+    setContent(item.content);
+    setModalOpen(true);
   }
 
-  function handleEditClick(notice) {
-    setIsEditing(true);
-    setEditingNotice(notice);
-    setForm({
-      title: notice.title || "",
-      content: notice.content || "",
-    });
-  }
-
-  async function handleDeleteClick(notice) {
-    const noticeId = notice.notice_id ?? notice.id;
-
-    if (!noticeId) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete notice #${noticeId}?`
-    );
-    if (!confirmed) return;
-
-    try {
-      setSubmitting(true);
-      setError("");
-
-      const res = await fetch(`${API_BASE_URL}/notice/delete/${noticeId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.error || `Failed to delete notice: ${res.status}`);
-      }
-
-      // Remove from local state
-      setNotices((prev) =>
-        prev.filter((n) => (n.notice_id ?? n.id) !== noticeId)
-      );
-
-      // Clear form if we were editing this one
-      if (
-        editingNotice &&
-        (editingNotice.notice_id ?? editingNotice.id) === noticeId
-      ) {
-        resetForm();
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Failed to delete notice.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
+  // -----------------------------
+  // ADD / UPDATE NOTICE
+  // -----------------------------
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.title.trim() || !form.content.trim()) {
-      setError("Title and content are required.");
-      return;
-    }
+
+    const csrf = getAccessCsrfToken();
+    const payload = {
+      title,
+      content,
+      posted_by: user.login_id, // backend accepts this
+    };
 
     try {
-      setSubmitting(true);
-      setError("");
-
-      if (isEditing && editingNotice) {
-        // UPDATE mode
-        const noticeId = editingNotice.notice_id ?? editingNotice.id;
-
-        const payload = {
-          title: form.title.trim(),
-          content: form.content.trim(),
-          // Preserve original posted_by and created_at
-          posted_by: editingNotice.posted_by,
-          created_at: editingNotice.created_at,
-        };
-
-        const res = await fetch(`${API_BASE_URL}/notice/update/${noticeId}`, {
+      if (editMode) {
+        // update
+        await fetch(`${API_BASE_URL}/notice/update/${selectedId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrf,
           },
           credentials: "include",
           body: JSON.stringify(payload),
         });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data?.error || `Failed to update notice: ${res.status}`);
-        }
-
-        // Update local list
-        setNotices((prev) =>
-          prev.map((n) =>
-            (n.notice_id ?? n.id) === noticeId
-              ? {
-                  ...n,
-                  title: payload.title,
-                  content: payload.content,
-                  posted_by: payload.posted_by,
-                  created_at: payload.created_at,
-                }
-              : n
-          )
-        );
       } else {
-        // ADD mode
-        const payload = {
-          title: form.title.trim(),
-          content: form.content.trim(),
-          // posted_by & created_at filled by backend
-        };
-
-        const res = await fetch(`${API_BASE_URL}/notice/add`, {
+        // add
+        await fetch(`${API_BASE_URL}/notice/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrf,
           },
           credentials: "include",
           body: JSON.stringify(payload),
         });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data?.error || `Failed to add notice: ${res.status}`);
-        }
-
-        // Refetch to include new notice
-        await fetchNotices();
       }
 
-      resetForm();
+      setModalOpen(false);
+      loadNotices();
     } catch (err) {
-      console.error(err);
-      setError(
-        err.message ||
-          (isEditing ? "Failed to update notice." : "Failed to add notice.")
-      );
-    } finally {
-      setSubmitting(false);
+      console.error("Failed to save notice", err);
     }
   }
 
-  return (
-    <section className="w-full h-full flex flex-col gap-6 p-6 bg-gray-50">
-      {/* Header / Summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Notice Management
-          </h2>
-          <p className="text-sm text-gray-600">
-            Add, edit, and delete notices for students and faculty.
-          </p>
-        </div>
+  // -----------------------------
+  // DELETE NOTICE
+  // -----------------------------
+  async function confirmDelete() {
+    const csrf = getAccessCsrfToken();
 
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-800 shadow-sm border">
-            Total Notices: <span className="ml-1">{notices.length}</span>
-          </span>
-          <button
-            type="button"
-            onClick={resetForm}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-100 transition"
-          >
-            Clear Form
-          </button>
-        </div>
+    try {
+      await fetch(`${API_BASE_URL}/notice/delete/${deleteId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": csrf,
+        },
+        credentials: "include",
+      });
+
+      setDeleteId(null);
+      loadNotices();
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  }
+
+  // ==================================================================
+  // UI
+  // ==================================================================
+  return (
+    <div className="p-6">
+      {/* PAGE HEADER */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold text-white">Manage Notices</h2>
+
+        <button
+          onClick={openAddModal}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r 
+                     from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 
+                     px-4 py-2 text-white font-medium shadow-lg shadow-cyan-500/25 
+                     hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105"
+        >
+          <PlusCircle className="w-5 h-5" />
+          Add Notice
+        </button>
       </div>
 
-      {/* Error banner */}
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-          {error}
+      {/* TABLE */}
+      <div className="bg-[#0d1d35]/60 backdrop-blur-lg rounded-xl border border-white/10 p-4 shadow-xl">
+        <table className="w-full text-sm text-left text-slate-300">
+          <thead className="text-slate-200 bg-white/5 border-b border-white/10">
+            <tr>
+              <th className="px-4 py-3">Title</th>
+              <th className="px-4 py-3">Content</th>
+              <th className="px-4 py-3">Posted By</th>
+              <th className="px-4 py-3">Created</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan="5" className="text-center py-4 text-slate-400">
+                  Loading...
+                </td>
+              </tr>
+            )}
+
+            {!loading && notices.length === 0 && (
+              <tr>
+                <td colSpan="5" className="text-center py-4 text-slate-400">
+                  No notices found.
+                </td>
+              </tr>
+            )}
+
+            {notices.map((item) => (
+              <tr
+                key={item.notice_id}
+                className="border-b border-white/5 hover:bg-white/5 transition"
+              >
+                <td className="px-4 py-3">{item.title}</td>
+                <td className="px-4 py-3">{item.content}</td>
+                <td className="px-4 py-3">{item.posted_by}</td>
+                <td className="px-4 py-3">{item.created_at}</td>
+
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3 justify-end">
+                    {/* EDIT */}
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="text-cyan-300 hover:text-cyan-400 transition"
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </button>
+
+                    {/* DELETE */}
+                    <button
+                      onClick={() => setDeleteId(item.notice_id)}
+                      className="text-red-400 hover:text-red-500 transition"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ========================================================= */}
+      {/* ADD / EDIT MODAL */}
+      {/* ========================================================= */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-[#0d1d35] border border-white/10 rounded-xl p-6 w-full max-w-lg shadow-xl relative">
+            <button
+              onClick={() => setModalOpen(false)}
+              className="absolute top-3 right-3 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-xl font-semibold text-white mb-4">
+              {editMode ? "Edit Notice" : "Add Notice"}
+            </h3>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* TITLE */}
+              <div>
+                <label className="text-slate-300 text-sm">Title</label>
+                <input
+                  className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
+                             focus:ring-2 focus:ring-cyan-500 text-white outline-none"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* CONTENT */}
+              <div>
+                <label className="text-slate-300 text-sm">Content</label>
+                <textarea
+                  rows="4"
+                  className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
+                             focus:ring-2 focus:ring-cyan-500 text-white outline-none"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* SUBMIT BUTTON */}
+              <button
+                type="submit"
+                className="w-full rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 
+                           hover:from-cyan-400 hover:to-blue-400 text-white py-2 text-lg font-medium
+                           shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 
+                           transition-all duration-300 hover:scale-[1.03]"
+              >
+                {editMode ? "Save Changes" : "Add Notice"}
+              </button>
+            </form>
+          </div>
         </div>
       )}
 
-      {/* Form Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">
-            {isEditing ? "Edit Notice" : "Create New Notice"}
-          </h3>
-          {isEditing && editingNotice && (
-            <span className="text-xs text-gray-500">
-              Editing ID: {editingNotice.notice_id ?? editingNotice.id}
-            </span>
-          )}
-        </div>
+      {/* ========================================================= */}
+      {/* DELETE CONFIRMATION */}
+      {/* ========================================================= */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-[#0d1d35] border border-white/10 rounded-xl p-6 w-full max-w-sm shadow-xl text-center">
+            <h3 className="text-white text-lg font-semibold mb-2">
+              Delete Notice?
+            </h3>
+            <p className="text-slate-400 text-sm mb-4">
+              This action cannot be undone.
+            </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-              placeholder="Enter notice title"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Content <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="content"
-              value={form.content}
-              onChange={handleChange}
-              rows={4}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white resize-y"
-              placeholder="Write the notice details here..."
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-3">
-            {isEditing && (
+            <div className="flex items-center justify-center gap-3">
               <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
-                disabled={submitting}
+                onClick={() => setDeleteId(null)}
+                className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
               >
                 Cancel
               </button>
-            )}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed transition"
-            >
-              {submitting
-                ? isEditing
-                  ? "Saving..."
-                  : "Creating..."
-                : isEditing
-                ? "Save Changes"
-                : "Create Notice"}
-            </button>
+
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-600 text-white transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </form>
-      </div>
-
-      {/* Table Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 flex flex-col overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-800">All Notices</h3>
-          {loading && (
-            <span className="text-xs text-gray-500">Loading...</span>
-          )}
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-4 py-2 text-left font-medium text-gray-600">
-                  ID
-                </th>
-                <th className="px-4 py-2 text-left font-medium text-gray-600">
-                  Title
-                </th>
-                <th className="px-4 py-2 text-left font-medium text-gray-600">
-                  Content
-                </th>
-                <th className="px-4 py-2 text-left font-medium text-gray-600">
-                  Posted By
-                </th>
-                <th className="px-4 py-2 text-left font-medium text-gray-600">
-                  Created At
-                </th>
-                <th className="px-4 py-2 text-right font-medium text-gray-600">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {notices.length === 0 && !loading ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-4 py-6 text-center text-sm text-gray-500"
-                  >
-                    No notices found.
-                  </td>
-                </tr>
-              ) : (
-                notices.map((notice) => {
-                  const id = notice.notice_id ?? notice.id;
-                  return (
-                    <tr
-                      key={id}
-                      className="border-b last:border-b-0 hover:bg-gray-50/80"
-                    >
-                      <td className="px-4 py-2 align-top text-gray-800">
-                        {id}
-                      </td>
-                      <td className="px-4 py-2 align-top font-medium text-gray-900 max-w-xs truncate">
-                        {notice.title}
-                      </td>
-                      <td className="px-4 py-2 align-top text-gray-700 max-w-md">
-                        <p className="line-clamp-3 text-xs sm:text-sm">
-                          {notice.content}
-                        </p>
-                      </td>
-                      <td className="px-4 py-2 align-top text-gray-700 text-xs sm:text-sm">
-                        {notice.posted_by ?? "—"}
-                      </td>
-                      <td className="px-4 py-2 align-top text-gray-500 text-xs sm:text-sm whitespace-nowrap">
-                        {notice.created_at
-                          ? new Date(notice.created_at).toLocaleString()
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-2 align-top text-right">
-                        <div className="inline-flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleEditClick(notice)}
-                            className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100 transition"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteClick(notice)}
-                            disabled={submitting}
-                            className="rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 transition disabled:opacity-60"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+      )}
+    </div>
   );
 }
