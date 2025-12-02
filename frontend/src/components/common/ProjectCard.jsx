@@ -1,10 +1,9 @@
 /**
  * @author Anish
- * @description This is the project card component for the landing page
- * @date 30-11-2025
+ * @description Project card component (Airforce blue theme)
+ * @date 30-11-2025 (updated)
  * @returns a JSX component
  */
-
 
 export default function ProjectCard({
   projectName,
@@ -17,11 +16,11 @@ export default function ProjectCard({
   return (
     <div
       style={{
-        background: "linear-gradient(145deg, #1e293b 0%, #0f172a 100%)",
+        background: "linear-gradient(145deg, #ffffff 0%, #f8fbfd 100%)",
         borderRadius: "16px",
         overflow: "hidden",
-        border: "1px solid rgba(148, 163, 184, 0.1)",
-        boxShadow: "0 10px 40px -10px rgba(0, 0, 0, 0.4)",
+        border: "1px solid rgba(148, 163, 184, 0.5)",
+        boxShadow: "0 10px 40px -10px rgba(15, 23, 42, 0.15)",
         transition: "transform 0.3s ease, box-shadow 0.3s ease",
         width: "100%",
         maxWidth: "380px",
@@ -29,12 +28,12 @@ export default function ProjectCard({
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "translateY(-4px)";
         e.currentTarget.style.boxShadow =
-          "0 20px 50px -10px rgba(6, 182, 212, 0.2)";
+          "0 20px 50px -10px rgba(56, 189, 248, 0.25)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = "translateY(0)";
         e.currentTarget.style.boxShadow =
-          "0 10px 40px -10px rgba(0, 0, 0, 0.4)";
+          "0 10px 40px -10px rgba(15, 23, 42, 0.15)";
       }}
     >
       {/* Project Image */}
@@ -67,7 +66,7 @@ export default function ProjectCard({
             right: 0,
             height: "60px",
             background:
-              "linear-gradient(to top, rgba(15, 23, 42, 1) 0%, transparent 100%)",
+              "linear-gradient(to top, rgba(248, 250, 252, 1) 0%, transparent 100%)",
           }}
         />
       </div>
@@ -79,7 +78,7 @@ export default function ProjectCard({
           style={{
             fontSize: "1.25rem",
             fontWeight: "700",
-            color: "#ffffff",
+            color: "#0f1c2c",
             marginBottom: "1rem",
             fontFamily: "Georgia, serif",
           }}
@@ -100,13 +99,13 @@ export default function ProjectCard({
             <span
               key={index}
               style={{
-                background: "rgba(6, 182, 212, 0.15)",
-                color: "#06b6d4",
+                background: "rgba(6, 182, 212, 0.12)",
+                color: "#0369a1",
                 padding: "0.25rem 0.75rem",
                 borderRadius: "9999px",
                 fontSize: "0.75rem",
                 fontWeight: "500",
-                border: "1px solid rgba(6, 182, 212, 0.3)",
+                border: "1px solid rgba(6, 182, 212, 0.35)",
               }}
             >
               {tech}
@@ -116,7 +115,7 @@ export default function ProjectCard({
 
         {/* Supervisor */}
         <div style={{ marginBottom: "0.75rem" }}>
-          <span style={{ color: "#94a3b8", fontSize: "0.875rem" }}>
+          <span style={{ color: "#64748b", fontSize: "0.875rem" }}>
             Supervisor:{" "}
           </span>
           <span
@@ -132,10 +131,10 @@ export default function ProjectCard({
 
         {/* Team */}
         <div style={{ marginBottom: "1.25rem" }}>
-          <span style={{ color: "#94a3b8", fontSize: "0.875rem" }}>
+          <span style={{ color: "#64748b", fontSize: "0.875rem" }}>
             Team:{" "}
           </span>
-          <span style={{ color: "#e2e8f0", fontSize: "0.875rem" }}>
+          <span style={{ color: "#0f1c2c", fontSize: "0.875rem" }}>
             {team.join(", ")}
           </span>
         </div>
@@ -149,8 +148,7 @@ export default function ProjectCard({
             display: "inline-flex",
             alignItems: "center",
             gap: "0.5rem",
-            background:
-              "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
+            background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
             color: "#ffffff",
             padding: "0.625rem 1.25rem",
             borderRadius: "8px",
@@ -158,7 +156,7 @@ export default function ProjectCard({
             fontWeight: "600",
             textDecoration: "none",
             transition: "opacity 0.2s ease, transform 0.2s ease",
-            boxShadow: "0 4px 15px rgba(6, 182, 212, 0.3)",
+            boxShadow: "0 4px 15px rgba(6, 182, 212, 0.4)",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.opacity = "0.9";

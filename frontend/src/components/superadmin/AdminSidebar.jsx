@@ -8,7 +8,7 @@
 
 
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, User, Bell, Calendar, PartyPopper, Briefcase, GraduationCap, School } from "lucide-react"
+import { LayoutDashboard, User, Bell, Calendar, PartyPopper, Briefcase, GraduationCap, School, Book } from "lucide-react"
 
 export default function AdminSidebar({ open, onClose, user }) {
   const { pathname } = useLocation()
@@ -26,7 +26,8 @@ export default function AdminSidebar({ open, onClose, user }) {
     { name: "Notices", to: "/admin/notices", icon: Bell },
     { name: "Schedule", to: "/admin/schedule", icon: Calendar },
     { name: "Events", to: "/admin/events", icon: PartyPopper },
-    { name: "Job Updates", to: "/admin/job", icon: Briefcase },
+    { name: "Job Updates", to: "/admin/jobs", icon: Briefcase },
+    {name: "Subjects", to: "/admin/subjects", icon: Book},
   ]
 
   return (

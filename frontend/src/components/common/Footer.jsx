@@ -1,7 +1,7 @@
 /**
  * @author Anish
- * @description Floating footer for the landing page
- * @date 30-11-2025
+ * @description Floating footer for the landing page (Airforce blue theme)
+ * @date 30-11-2025 (updated)
  * @returns JSX Component
  */
 
@@ -9,10 +9,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer
-      className="w-full py-6"
-      style={{ background: "#0a1628" }}
-    >
+    <footer className="w-full bg-[#e6f0f7] border-t border-[#c7d7e2] py-6">
       {/* Top gradient separator */}
       <div
         className="w-full h-0.5"
@@ -24,8 +21,9 @@ export default function Footer() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-center items-center">
-          <p className="text-sm text-slate-400 text-center">
-            © {currentYear} Department of Information Technology. All rights reserved.
+          <p className="text-sm text-[#58677a] text-center">
+            © {currentYear} Department of Information Technology. All rights
+            reserved.
           </p>
         </div>
       </div>

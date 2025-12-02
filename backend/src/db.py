@@ -461,7 +461,15 @@ def add_student(login_id: str, name: str, email: str, password: str, roll_no: Op
             conn.close()
 
 
-def update_student(student_id: int, name: Optional[str], email: Optional[str], password: Optional[str], roll_no: Optional[str], semester: Optional[int], program_id: Optional[int]) -> int:
+def update_student(
+    student_id: int,
+    name: Optional[str],
+    email: Optional[str],
+    password: Optional[str],
+    roll_no: Optional[str],
+    semester: Optional[int],
+    program_id: Optional[int],
+) -> int:
     conn: Optional[pymysql.connections.Connection] = None
     try:
         conn = get_connection()
@@ -479,16 +487,15 @@ def update_student(student_id: int, name: Optional[str], email: Optional[str], p
             cur.execute(sql, (name, email, password, roll_no, semester, program_id, student_id))
             conn.commit()
             return cur.rowcount
-        
     except Exception as exc:
         if conn:
             conn.rollback()
         print("[ERROR] update_student:", exc)
         return 0
-    
     finally:
         if conn:
             conn.close()
+
 
 
 def delete_student(student_id: int) -> int:
@@ -516,130 +523,122 @@ def delete_student(student_id: int) -> int:
 # SUBJECT - TEACHER MAPPING
 # ============================================================
 
+# -------------------------
+# SUBJECT TEACHER MAPPING
+# -------------------------
+
 def assign_teacher_to_subject(teacher_id: int, subject_id: int) -> int:
-    conn: Optional[pymysql.connections.Connection] = None
+    """
+    Insert mapping (teacher_id, subject_id).
+    If already exists, it won't create a duplicate.
+    Returns new id or existing id.
+    """
+    sql = """
+        INSERT INTO subject_teachers (teacher_id, subject_id)
+        VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE
+            teacher_id = VALUES(teacher_id),
+            subject_id = VALUES(subject_id)
+    """
+    conn = get_connection()
     try:
-        conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO subject_teachers (teacher_id, subject_id) VALUES (%s, %s)", (teacher_id, subject_id))
+            cur.execute(sql, (teacher_id, subject_id))
             conn.commit()
-            return int(cur.lastrowid or -1)
-        
-    except Exception as exc:
-        if conn:
-            conn.rollback()
-        print("[ERROR] assign_teacher_to_subject:", exc)
+            return int(cur.lastrowid or 0)
+    except Exception as e:
+        print("[ERROR] assign_teacher_to_subject:", e)
+        conn.rollback()
         return -1
-    
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
 
 def get_teachers_for_subject(subject_id: int) -> List[Dict[str, Any]]:
-    conn: Optional[pymysql.connections.Connection] = None
+    sql = """
+        SELECT st.id,
+               t.teacher_id, t.login_id, t.name, t.email, t.subject,
+               s.subject_id, s.code AS subject_code, s.name AS subject_name
+        FROM subject_teachers st
+        JOIN teachers t ON t.teacher_id = st.teacher_id
+        JOIN subjects s ON s.subject_id = st.subject_id
+        WHERE st.subject_id = %s
+    """
+    conn = get_connection()
     try:
-        conn = get_connection()
-        with conn.cursor() as cur:
-            sql = """
-                SELECT t.teacher_id, t.login_id, t.name, t.email, t.subject
-                FROM teachers t
-                JOIN subject_teachers st ON st.teacher_id = t.teacher_id
-                WHERE st.subject_id = %s
-            """
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
             cur.execute(sql, (subject_id,))
-            return cast(List[Dict[str, Any]], cur.fetchall())
-        
-    except Exception as exc:
-        print("[ERROR] get_teachers_for_subject:", exc)
-        return []
-    
+            return list(cur.fetchall())
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
 
 
 # ============================================================
 # SCHEDULES
 # ============================================================
 
-def get_all_schedules() -> List[Dict[str, Any]]:
-    conn: Optional[pymysql.connections.Connection] = None
-    try:
-        conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT schedule_id, subject_id, teacher_id, title, location, start_time, end_time FROM schedules ORDER BY start_time DESC")
-            return cast(List[Dict[str, Any]], cur.fetchall())
-        
-    except Exception as exc:
-        print("[ERROR] get_all_schedules:", exc)
-        return []
-    
-    finally:
-        if conn:
-            conn.close()
-
-
-def add_schedule(subject_id: int, teacher_id: Optional[int], title: str, location: str, start_time: str, end_time: str) -> int:
-    conn: Optional[pymysql.connections.Connection] = None
-    try:
-        conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO schedules (subject_id, teacher_id, title, location, start_time, end_time) VALUES (%s, %s, %s, %s, %s, %s)",
-                (subject_id, teacher_id, title, location, start_time, end_time),
-            )
-            conn.commit()
-            return int(cur.lastrowid or -1)
-        
-    except Exception as exc:
-        if conn:
-            conn.rollback()
-        print("[ERROR] add_schedule:", exc)
-        return -1
-    
-    finally:
-        if conn:
-            conn.close()
-
-
-def update_schedule(
-    schedule_id: int,
-    subject_id: Optional[int],
-    teacher_id: Optional[int],
+def add_schedule(
+    program_id: int,
+    semester: int,
+    image_url: str,
     title: Optional[str],
-    location: Optional[str],
-    start_time: Optional[str],
-    end_time: Optional[str]
+    uploaded_by: str,
 ) -> int:
-    conn: Optional[pymysql.connections.Connection] = None
+    sql = """
+        INSERT INTO schedules
+          (program_id, semester, image_url, title, uploaded_by)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    conn = get_connection()
     try:
-        conn = get_connection()
         with conn.cursor() as cur:
-            sql = """
-                UPDATE schedules
-                SET
-                    subject_id = COALESCE(%s, subject_id),
-                    teacher_id = COALESCE(%s, teacher_id),
-                    title = COALESCE(%s, title),
-                    location = COALESCE(%s, location),
-                    start_time = COALESCE(%s, start_time),
-                    end_time = COALESCE(%s, end_time)
-                WHERE schedule_id=%s
-            """
-            cur.execute(sql, (subject_id, teacher_id, title, location, start_time, end_time, schedule_id))
+            cur.execute(sql, (program_id, semester, image_url, title, uploaded_by))
             conn.commit()
-            return cur.rowcount
-        
-    except Exception as exc:
-        if conn:
-            conn.rollback()
-        print("[ERROR] update_schedule:", exc)
-        return 0
-    
+            return int(cur.lastrowid)
+    except Exception as e:
+        print("[ERROR] add_schedule:", e)
+        conn.rollback()
+        return -1
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
+
+def get_schedules_by_program_sem(program_id: int, semester: int) -> List[Dict[str, Any]]:
+    sql = """
+        SELECT s.schedule_id, s.program_id, s.semester, s.image_url,
+               s.title, s.uploaded_by, s.created_at,
+               p.code AS program_code, p.name AS program_name
+        FROM schedules s
+        JOIN programs p ON p.program_id = s.program_id
+        WHERE s.program_id = %s AND s.semester = %s
+        ORDER BY s.created_at DESC
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
+            cur.execute(sql, (program_id, semester))
+            return list(cur.fetchall())
+    finally:
+        conn.close()
+
+
+def get_all_schedules() -> List[Dict[str, Any]]:
+    sql = """
+        SELECT s.schedule_id, s.program_id, s.semester, s.image_url,
+               s.title, s.uploaded_by, s.created_at,
+               p.code AS program_code, p.name AS program_name
+        FROM schedules s
+        JOIN programs p ON p.program_id = s.program_id
+        ORDER BY s.created_at DESC
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
+            cur.execute(sql)
+            return list(cur.fetchall())
+    finally:
+        conn.close()
 
 
 def delete_schedule(schedule_id: int) -> int:
@@ -850,70 +849,115 @@ def delete_event(event_id: int) -> int:
 # JOBS
 # ======================
 
+# -------------------------
+# JOBS
+# -------------------------
+
 def get_all_jobs() -> List[Dict[str, Any]]:
-    conn: Optional[pymysql.connections.Connection] = None
+    sql = """
+        SELECT job_id, title, description, company, apply_link,
+               last_date, posted_by, created_at
+        FROM job_updates
+        ORDER BY created_at DESC
+    """
+    conn = get_connection()
     try:
-        conn = get_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT job_id, title, description, company, apply_link, posted_by, created_at FROM job_updates ORDER BY job_id DESC")
-            return cast(List[Dict[str, Any]], cur.fetchall())
-        
-    except Exception as exc:
-        print("[ERROR] get_all_jobs:", exc)
-        return []
-    
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
+            cur.execute(sql)
+            rows = cur.fetchall()
+            return list(rows)
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
 
-def add_job(title: str, description: str, company: str, apply_link: str, posted_by: str) -> int:
-    conn: Optional[pymysql.connections.Connection] = None
+def add_job(
+    title: str,
+    description: str,
+    company: str,
+    apply_link: str,
+    last_date: Optional[str],
+    posted_by: str,
+) -> int:
+    """
+    last_date should be 'YYYY-MM-DD' string or None.
+    """
+    sql = """
+        INSERT INTO job_updates
+          (title, description, company, apply_link, last_date, posted_by)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    conn = get_connection()
     try:
-        conn = get_connection()
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO job_updates (title, description, company, apply_link, posted_by) VALUES (%s, %s, %s, %s, %s)", (title, description, company, apply_link, posted_by))
+            cur.execute(sql, (title, description, company, apply_link, last_date, posted_by))
             conn.commit()
-            return int(cur.lastrowid or -1)
-        
-    except Exception as exc:
-        if conn:
-            conn.rollback()
-        print("[ERROR] add_job:", exc)
+            return int(cur.lastrowid)
+    except Exception as e:
+        print("[ERROR] add_job:", e)
+        conn.rollback()
         return -1
-    
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
 
-def update_job(job_id: int, title: Optional[str], description: Optional[str], company: Optional[str], apply_link: Optional[str], posted_by: Optional[str]) -> int:
-    conn: Optional[pymysql.connections.Connection] = None
-    try:
-        conn = get_connection()
-        with conn.cursor() as cur:
-            sql = """
-                UPDATE job_updates
-                SET title = COALESCE(%s, title),
-                    description = COALESCE(%s, description),
-                    company = COALESCE(%s, company),
-                    apply_link = COALESCE(%s, apply_link),
-                    posted_by = COALESCE(%s, posted_by)
-                WHERE job_id=%s
-            """
-            cur.execute(sql, (title, description, company, apply_link, posted_by, job_id))
-            conn.commit()
-            return cur.rowcount
-        
-    except Exception as exc:
-        if conn:
-            conn.rollback()
-        print("[ERROR] update_job:", exc)
+def update_job(
+    job_id: int,
+    title: Optional[str],
+    description: Optional[str],
+    company: Optional[str],
+    apply_link: Optional[str],
+    last_date: Optional[str],
+    posted_by: Optional[str],
+) -> int:
+    """
+    Update fields if provided. last_date: 'YYYY-MM-DD' or None (keeps existing if None)
+    """
+    # build dynamic SQL so we don't overwrite with NULL unless we want to
+    fields = []
+    params: List[Any] = []
+
+    if title is not None:
+        fields.append("title = %s")
+        params.append(title)
+    if description is not None:
+        fields.append("description = %s")
+        params.append(description)
+    if company is not None:
+        fields.append("company = %s")
+        params.append(company)
+    if apply_link is not None:
+        fields.append("apply_link = %s")
+        params.append(apply_link)
+    if last_date is not None:
+        fields.append("last_date = %s")
+        params.append(last_date)
+    if posted_by is not None:
+        fields.append("posted_by = %s")
+        params.append(posted_by)
+
+    if not fields:
         return 0
-    
+
+    sql = f"""
+        UPDATE job_updates
+        SET {", ".join(fields)}
+        WHERE job_id = %s
+    """
+    params.append(job_id)
+
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            conn.commit()
+            return int(cur.rowcount)
+    except Exception as e:
+        print("[ERROR] update_job:", e)
+        conn.rollback()
+        return -1
     finally:
-        if conn:
-            conn.close()
+        conn.close()
+
 
 
 def delete_job(job_id: int) -> int:

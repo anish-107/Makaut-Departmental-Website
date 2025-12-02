@@ -51,7 +51,7 @@ from src.db import (
     # schedules
     get_all_schedules,
     add_schedule,
-    update_schedule,
+    get_schedules_by_program_sem,
     delete_schedule,
     # notices/events/jobs
     get_all_notices,
@@ -162,19 +162,34 @@ def route_login() -> FlaskReturn:
     access_token = create_access_token(identity=login_id, additional_claims=additional_claims)
     refresh_token = create_refresh_token(identity=login_id, additional_claims=additional_claims)
 
+    # ---- build safe_user with role-specific fields ----
+    safe_user: Dict[str, Any] = {
+        "login_id": login_id,
+        "name": user.get("name"),
+        "email": user.get("email"),
+        "role": role,
+    }
+
+    if role == "student":
+        safe_user["student_id"] = user.get("student_id")
+        safe_user["roll_no"] = user.get("roll_no")
+        safe_user["semester"] = user.get("semester")
+        safe_user["program_id"] = user.get("program_id")
+    elif role == "teacher":
+        safe_user["teacher_id"] = user.get("teacher_id")
+        safe_user["subject"] = user.get("subject")
+    elif role == "admin":
+        safe_user["admin_id"] = user.get("admin_id")
+
     resp = jsonify({
         "message": "Login successful",
-        "user": {
-            "login_id": login_id,
-            "name": user.get("name"),
-            "email": user.get("email"),
-            "role": role,
-        },
+        "user": safe_user,
     })
 
     set_access_cookies(resp, access_token)
     set_refresh_cookies(resp, refresh_token)
     return resp, 200
+
 
 
 @app.post("/auth/refresh")
@@ -494,18 +509,58 @@ def route_add_student() -> FlaskReturn:
     return jsonify({"message": "Student added", "student_id": inserted_id, "login_id": login_id}), 201
 
 
+# -------------------------
+# STUDENT ROUTES
+# -------------------------
 @app.put("/students/update/<int:student_id>")
 @jwt_required()
 def route_update_student(student_id: int) -> FlaskReturn:
     """
     Update a student.
     Expects JSON: { name?, email?, password?, roll_no?, semester?, program_id? }
-    Protected: admin only OR student themself (here admin only for simplicity)
+
+    Protected:
+      - admin can update any student (all fields)
+      - student can update ONLY their own record, and only:
+          name, email, password
+        (roll_no, semester, program_id are locked for students)
     """
     claims = get_jwt()
-    if claims.get("role") != "admin":
+    role = claims.get("role")
+    identity = get_jwt_identity()  # login_id string like "83xxxxxx"
+
+    # ----- permission check -----
+    if role == "admin":
+        # admin can update any student_id
+        pass
+    elif role == "student":
+        # student can only update their own row
+        if not identity:
+            return jsonify({"error": "Forbidden"}), 403
+
+        user_row = get_user_by_login_id(identity)
+        if not user_row:
+            return jsonify({"error": "Forbidden"}), 403
+
+        db_student_id = user_row.get("student_id")
+        
+        if db_student_id is None or student_id is None:
+            return jsonify({"error": "Forbidden"}), 403
+
+        try:
+            db_sid = int(db_student_id)
+            req_sid = int(student_id)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Forbidden"}), 403
+
+        if db_sid != req_sid:
+            return jsonify({"error": "Forbidden"}), 403
+
+    else:
+        # teacher/unknown cannot update students via this endpoint
         return jsonify({"error": "Forbidden"}), 403
 
+    # ----- read body -----
     data: Dict[str, Any] = request.get_json(silent=True) or {}
     name = data.get("name")
     email = data.get("email")
@@ -514,13 +569,27 @@ def route_update_student(student_id: int) -> FlaskReturn:
     semester = data.get("semester")
     program_id = data.get("program_id")
 
+    # If a student is updating themself, lock academic fields
+    if role == "student":
+        roll_no = None
+        semester = None
+        program_id = None
+
     try:
         semester_i = int(semester) if semester is not None else None
         program_id_i = int(program_id) if program_id is not None else None
     except (ValueError, TypeError):
         return jsonify({"error": "semester and program_id must be integers"}), 400
 
-    affected: int = update_student(student_id, name, email, password, roll_no, semester_i, program_id_i)
+    affected: int = update_student(
+        student_id,
+        name,
+        email,
+        password,
+        roll_no,
+        semester_i,
+        program_id_i,
+    )
     return jsonify({"message": "Student updated", "affected_rows": affected}), 200
 
 
@@ -538,9 +607,6 @@ def route_delete_student(student_id: int) -> FlaskReturn:
     return jsonify({"message": "Student deleted", "affected_rows": affected}), 200
 
 
-# -------------------------
-# SUBJECT TEACHER MAPPING
-# -------------------------
 @app.post("/subject/assign-teacher")
 @jwt_required()
 def route_assign_teacher_to_subject() -> FlaskReturn:
@@ -572,7 +638,6 @@ def route_assign_teacher_to_subject() -> FlaskReturn:
 
     return jsonify({"message": "Teacher assigned", "id": inserted_id}), 201
 
-
 @app.get("/subject/teachers/<int:subject_id>")
 def route_get_teachers_for_subject(subject_id: int) -> FlaskReturn:
     """Get teachers assigned to a subject."""
@@ -581,80 +646,70 @@ def route_get_teachers_for_subject(subject_id: int) -> FlaskReturn:
 
 
 # -------------------------
-# SCHEDULE ROUTES
+# SCHEDULE ROUTES (image-based)
 # -------------------------
-@app.get("/schedules/all")
-def route_get_schedules() -> FlaskReturn:
-    """Return all schedules (public)."""
-    rows: List[Dict[str, Any]] = get_all_schedules()
-    return jsonify(rows), 200
-
-
 @app.post("/schedule/add")
 @jwt_required()
 def route_add_schedule() -> FlaskReturn:
     """
-    Add schedule entry.
-    Expects JSON: { subject_id, teacher_id?, title?, location?, start_time, end_time }
-    Protected: teacher/admin
+    Add a schedule image.
+    Body: { program_id, semester, image_url, title? }
+    Protected: admin/teacher
     """
     claims = get_jwt()
     if claims.get("role") not in ("admin", "teacher"):
         return jsonify({"error": "Forbidden"}), 403
 
     data: Dict[str, Any] = request.get_json(silent=True) or {}
-    subject_id = data.get("subject_id")
-    teacher_id = data.get("teacher_id")
+    program_id = data.get("program_id")
+    semester = data.get("semester")
+    image_url = data.get("image_url")
     title = data.get("title")
-    location = data.get("location")
-    start_time = data.get("start_time")
-    end_time = data.get("end_time")
+    uploaded_by = get_jwt_identity()
 
-    if subject_id is None or not start_time or not end_time:
-        return jsonify({"error": "Missing required fields (subject_id, start_time, end_time)"}), 400
+    if program_id is None or semester is None or not image_url:
+        return jsonify({"error": "Missing required fields"}), 400
 
     try:
-        subject_id_i = int(subject_id)
-        teacher_id_i = int(teacher_id) if teacher_id is not None else None
+        prog_i = int(program_id)
+        sem_i = int(semester)
     except (ValueError, TypeError):
-        return jsonify({"error": "subject_id and teacher_id must be integers"}), 400
+        return jsonify({"error": "program_id and semester must be integers"}), 400
 
-    inserted_id: int = add_schedule(subject_id_i, teacher_id_i, title or "", location or "", start_time, end_time)
+    inserted_id: int = add_schedule(prog_i, sem_i, image_url, title, uploaded_by)
     if inserted_id == -1:
         return jsonify({"error": "Failed to add schedule"}), 500
 
     return jsonify({"message": "Schedule added", "schedule_id": inserted_id}), 201
 
 
-@app.put("/schedule/update/<int:schedule_id>")
-@jwt_required()
-def route_update_schedule(schedule_id: int) -> FlaskReturn:
-    """
-    Update schedule entry.
-    Expects JSON: { subject_id?, teacher_id?, title?, location?, start_time?, end_time? }
-    Protected: teacher/admin
-    """
-    claims = get_jwt()
-    if claims.get("role") not in ("admin", "teacher"):
-        return jsonify({"error": "Forbidden"}), 403
+@app.get("/schedule/all")
+def route_get_all_schedules() -> FlaskReturn:
+    """Return all schedule images."""
+    rows = get_all_schedules()
+    return jsonify(rows), 200
 
-    data: Dict[str, Any] = request.get_json(silent=True) or {}
-    subject_id = data.get("subject_id")
-    teacher_id = data.get("teacher_id")
-    title = data.get("title")
-    location = data.get("location")
-    start_time = data.get("start_time")
-    end_time = data.get("end_time")
+
+@app.get("/schedule/by-program")
+def route_get_schedules_by_program_sem() -> FlaskReturn:
+    """
+    Query params:
+      ?program_id=...&semester=...
+    """
+    program_id = request.args.get("program_id")
+    semester = request.args.get("semester")
+
+    if program_id is None or semester is None:
+        return jsonify({"error": "Missing program_id or semester"}), 400
 
     try:
-        subject_id_i = int(subject_id) if subject_id is not None else None
-        teacher_id_i = int(teacher_id) if teacher_id is not None else None
+        prog_i = int(program_id)
+        sem_i = int(semester)
     except (ValueError, TypeError):
-        return jsonify({"error": "subject_id and teacher_id must be integers"}), 400
+        return jsonify({"error": "program_id and semester must be integers"}), 400
 
-    affected: int = update_schedule(schedule_id, subject_id_i, teacher_id_i, title, location, start_time, end_time)
-    return jsonify({"message": "Schedule updated", "affected_rows": affected}), 200
-
+    rows = get_schedules_by_program_sem(prog_i, sem_i)
+    return jsonify(rows), 200
 
 @app.delete("/schedule/delete/<int:schedule_id>")
 @jwt_required()
@@ -810,14 +865,15 @@ def route_delete_event(event_id: int) -> FlaskReturn:
 
 
 # -------------------------
-# Jobs 
+# Jobs
 # -------------------------
 @app.post("/job/add")
 @jwt_required()
 def route_add_job() -> FlaskReturn:
     """
     Add job protected: teacher/admin.
-    Body: { title, description, company, apply_link?, posted_by? }
+    Body: { title, description, company, apply_link?, last_date?, posted_by? }
+    last_date: 'YYYY-MM-DD' string
     """
     claims = get_jwt()
     if claims.get("role") not in ("admin", "teacher"):
@@ -828,12 +884,13 @@ def route_add_job() -> FlaskReturn:
     description = data.get("description")
     company = data.get("company")
     apply_link = str(data.get("apply_link") or "")
+    last_date = data.get("last_date")  # string or None
     posted_by = data.get("posted_by") or get_jwt_identity()
 
     if not title or not description or not company or not posted_by:
         return jsonify({"error": "Missing fields"}), 400
 
-    inserted_id: int = add_job(title, description, company, apply_link, posted_by)
+    inserted_id: int = add_job(title, description, company, apply_link, last_date, posted_by)
     if inserted_id == -1:
         return jsonify({"error": "Failed to add job"}), 500
 
@@ -849,6 +906,10 @@ def route_get_jobs() -> FlaskReturn:
 @app.put("/job/update/<int:job_id>")
 @jwt_required()
 def route_update_job(job_id: int) -> FlaskReturn:
+    """
+    Update job.
+    Body: { title?, description?, company?, apply_link?, last_date?, posted_by? }
+    """
     claims = get_jwt()
     if claims.get("role") not in ("admin", "teacher"):
         return jsonify({"error": "Forbidden"}), 403
@@ -857,10 +918,11 @@ def route_update_job(job_id: int) -> FlaskReturn:
     title = data.get("title")
     description = data.get("description")
     company = data.get("company")
-    apply_link = str(data.get("apply_link") or "")
+    apply_link = data.get("apply_link")
+    last_date = data.get("last_date")
     posted_by = data.get("posted_by") or get_jwt_identity()
 
-    affected: int = update_job(job_id, title, description, company, apply_link, posted_by)
+    affected: int = update_job(job_id, title, description, company, apply_link, last_date, posted_by)
     return jsonify({"message": "Job updated", "affected_rows": affected}), 200
 
 

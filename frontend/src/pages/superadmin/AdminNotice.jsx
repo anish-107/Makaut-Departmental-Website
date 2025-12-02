@@ -167,52 +167,72 @@ export default function AdminNotice() {
         </button>
       </div>
 
-      {/* TABLE */}
-      <div className="bg-[#0d1d35]/60 backdrop-blur-lg rounded-xl border border-white/10 p-4 shadow-xl">
-        <table className="w-full text-sm text-left text-slate-300">
-          <thead className="text-slate-200 bg-white/5 border-b border-white/10">
+            {/* TABLE */}
+      <div className="bg-[#0b1220]/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl">
+        <table className="w-full text-sm text-left text-slate-200">
+          <thead className="bg-gradient-to-r from-cyan-600/30 to-blue-600/30 border-b border-white/20">
             <tr>
-              <th className="px-4 py-3">Title</th>
-              <th className="px-4 py-3">Content</th>
-              <th className="px-4 py-3">Posted By</th>
-              <th className="px-4 py-3">Created</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
+                Title
+              </th>
+              <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
+                Content
+              </th>
+              <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
+                Posted By
+              </th>
+              <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
+                Created
+              </th>
+              <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs text-right">
+                Actions
+              </th>
             </tr>
           </thead>
 
           <tbody>
             {loading && (
               <tr>
-                <td colSpan="5" className="text-center py-4 text-slate-400">
-                  Loading...
+                <td
+                  colSpan="5"
+                  className="text-center py-6 text-slate-400 italic"
+                >
+                  Loading Notices...
                 </td>
               </tr>
             )}
 
             {!loading && notices.length === 0 && (
               <tr>
-                <td colSpan="5" className="text-center py-4 text-slate-400">
+                <td
+                  colSpan="5"
+                  className="text-center py-6 text-slate-400 italic"
+                >
                   No notices found.
                 </td>
               </tr>
             )}
 
-            {notices.map((item) => (
+            {notices.map((item, idx) => (
               <tr
                 key={item.notice_id}
-                className="border-b border-white/5 hover:bg-white/5 transition"
+                className={`transition-all ${
+                  idx % 2 === 0
+                    ? "bg-white/5"
+                    : "bg-white/10"
+                } hover:bg-cyan-500/20`}
               >
-                <td className="px-4 py-3">{item.title}</td>
-                <td className="px-4 py-3">{item.content}</td>
-                <td className="px-4 py-3">{item.posted_by}</td>
-                <td className="px-4 py-3">{item.created_at}</td>
+                <td className="px-5 py-4 text-[15px]">{item.title}</td>
+                <td className="px-5 py-4 text-[15px]">{item.content}</td>
+                <td className="px-5 py-4">{item.posted_by}</td>
+                <td className="px-5 py-4">{item.created_at}</td>
 
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3 justify-end">
+                <td className="px-5 py-4">
+                  <div className="flex items-center justify-end gap-4">
                     {/* EDIT */}
                     <button
                       onClick={() => openEditModal(item)}
-                      className="text-cyan-300 hover:text-cyan-400 transition"
+                      className="text-cyan-300 hover:text-cyan-400 hover:scale-110 transition-transform duration-150"
                     >
                       <Pencil className="w-5 h-5" />
                     </button>
@@ -220,7 +240,7 @@ export default function AdminNotice() {
                     {/* DELETE */}
                     <button
                       onClick={() => setDeleteId(item.notice_id)}
-                      className="text-red-400 hover:text-red-500 transition"
+                      className="text-red-400 hover:text-red-500 hover:scale-110 transition-transform duration-150"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -231,6 +251,7 @@ export default function AdminNotice() {
           </tbody>
         </table>
       </div>
+
 
       {/* ========================================================= */}
       {/* ADD / EDIT MODAL */}

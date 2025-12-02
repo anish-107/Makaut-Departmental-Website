@@ -1,10 +1,9 @@
 /**
  * @author Anish
- * @description This is the projects component for the landing page
- * @date 30-11-2025
+ * @description Projects component for the landing page (Airforce blue theme)
+ * @date 30-11-2025 (updated)
  * @returns a JSX component
  */
-
 
 import ProjectCard from "./ProjectCard";
 import Project1 from "@/assets/Common/project1.png";
@@ -48,18 +47,24 @@ export default function Projects() {
   return (
     <section
       style={{
-        background: "linear-gradient(180deg, #1e293b 0%, #0f172a 50%, #1e293b 100%)",
+        background: "linear-gradient(180deg, #e6f0f7 0%, #dbe7f0 50%, #e6f0f7 100%)",
         padding: "4rem 0",
       }}
     >
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.5rem" }}>
+      <div
+        style={{
+          maxWidth: "1280px",
+          margin: "0 auto",
+          padding: "0 1.5rem",
+        }}
+      >
         {/* Section Title */}
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
           <span
             style={{
               display: "inline-block",
-              background: "rgba(245, 158, 11, 0.15)",
-              color: "#f59e0b",
+              background: "rgba(245, 158, 11, 0.12)",
+              color: "#b45309",
               padding: "0.375rem 1rem",
               borderRadius: "9999px",
               fontSize: "0.875rem",
@@ -74,7 +79,7 @@ export default function Projects() {
             style={{
               fontSize: "2rem",
               fontWeight: "700",
-              color: "#ffffff",
+              color: "#0f1c2c",
               marginBottom: "0.5rem",
               fontFamily: "Georgia, serif",
             }}
@@ -83,13 +88,14 @@ export default function Projects() {
           </h2>
           <p
             style={{
-              color: "#94a3b8",
+              color: "#3f4c5d",
               fontSize: "1rem",
               maxWidth: "600px",
               margin: "0 auto",
             }}
           >
-            Discover the innovative work of our talented students pushing the boundaries of technology
+            Discover the innovative work of our talented students pushing the
+            boundaries of technology.
           </p>
           <div
             style={{
@@ -103,7 +109,13 @@ export default function Projects() {
         </div>
 
         {/* Projects List */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "3rem" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "3rem",
+          }}
+        >
           {highlightedProjects.map((project, index) => (
             <div
               key={index}
@@ -136,10 +148,10 @@ export default function Projects() {
               >
                 <div
                   style={{
-                    background: "rgba(30, 41, 59, 0.5)",
+                    background: "rgba(248, 250, 252, 0.95)",
                     borderRadius: "16px",
                     padding: "2rem",
-                    border: "1px solid rgba(148, 163, 184, 0.1)",
+                    border: "1px solid rgba(148, 163, 184, 0.4)",
                     position: "relative",
                   }}
                 >
@@ -149,7 +161,8 @@ export default function Projects() {
                       position: "absolute",
                       top: "-12px",
                       left: "1.5rem",
-                      background: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
+                      background:
+                        "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
                       color: "#ffffff",
                       width: "32px",
                       height: "32px",
@@ -169,7 +182,7 @@ export default function Projects() {
                     style={{
                       fontSize: "1.25rem",
                       fontWeight: "700",
-                      color: "#ffffff",
+                      color: "#0f1c2c",
                       marginBottom: "1rem",
                       marginTop: "0.5rem",
                       fontFamily: "Georgia, serif",
@@ -180,7 +193,7 @@ export default function Projects() {
 
                   <p
                     style={{
-                      color: "#cbd5e1",
+                      color: "#3f4c5d",
                       fontSize: "1rem",
                       lineHeight: "1.75",
                       textAlign: "justify",
@@ -203,7 +216,7 @@ export default function Projects() {
                         flex: 1,
                         height: "1px",
                         background:
-                          "linear-gradient(90deg, rgba(6, 182, 212, 0.5) 0%, transparent 100%)",
+                          "linear-gradient(90deg, rgba(6, 182, 212, 0.6) 0%, transparent 100%)",
                       }}
                     />
                     <svg
@@ -213,7 +226,7 @@ export default function Projects() {
                       fill="none"
                       stroke="#06b6d4"
                       strokeWidth="2"
-                      style={{ opacity: 0.6 }}
+                      style={{ opacity: 0.7 }}
                     >
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
@@ -222,7 +235,7 @@ export default function Projects() {
                         flex: 1,
                         height: "1px",
                         background:
-                          "linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.5) 100%)",
+                          "linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.6) 100%)",
                       }}
                     />
                   </div>

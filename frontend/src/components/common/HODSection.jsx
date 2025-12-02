@@ -1,12 +1,12 @@
 /**
  * @author Anish
- * @description This is the HOD Section for the landing page
- * @date 30-11-2025
+ * @description HOD Section (Airforce blue theme)
+ * @date 30-11-2025 (updated)
  * @returns a JSX component
  */
 
 import "@/index.css";
-import HodImage from '@/assets/Common/hod.jpg';
+import HodImage from "@/assets/Common/hod.jpg";
 
 export default function HODSection({
   hodImage = HodImage,
@@ -17,19 +17,24 @@ export default function HODSection({
   return (
     <section
       style={{
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        background: "linear-gradient(135deg, #e6f0f7 0%, #dbe7f0 100%)",
         padding: "4rem 0",
       }}
     >
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.5rem" }}>
-        
+      <div
+        style={{
+          maxWidth: "1280px",
+          margin: "0 auto",
+          padding: "0 1.5rem",
+        }}
+      >
         {/* Section Title */}
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
           <h2
             style={{
               fontSize: "2rem",
               fontWeight: "700",
-              color: "#ffffff",
+              color: "#0f1c2c",
               marginBottom: "0.5rem",
               fontFamily: "Georgia, serif",
             }}
@@ -49,13 +54,13 @@ export default function HODSection({
 
         {/* Content */}
         <div
-            className="hod-container"
-            style={{
-                display: "flex",
-                flexDirection: "column",   // mobile default
-                alignItems: "center",
-                gap: "3rem",
-            }}
+          className="hod-container"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "3rem",
+          }}
         >
           {/* Left: Image */}
           <div
@@ -73,8 +78,9 @@ export default function HODSection({
                 height: "320px",
                 borderRadius: "16px",
                 overflow: "hidden",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.35)",
                 border: "3px solid rgba(6, 182, 212, 0.3)",
+                backgroundColor: "#e5e7eb",
               }}
             >
               {/* Decorative corners */}
@@ -86,7 +92,7 @@ export default function HODSection({
                   width: "60px",
                   height: "60px",
                   background:
-                    "linear-gradient(135deg, rgba(6, 182, 212, 0.4) 0%, transparent 100%)",
+                    "linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, transparent 100%)",
                   zIndex: 1,
                 }}
               />
@@ -98,7 +104,7 @@ export default function HODSection({
                   width: "60px",
                   height: "60px",
                   background:
-                    "linear-gradient(315deg, rgba(245, 158, 11, 0.4) 0%, transparent 100%)",
+                    "linear-gradient(315deg, rgba(245, 158, 11, 0.35) 0%, transparent 100%)",
                   zIndex: 1,
                 }}
               />
@@ -122,7 +128,7 @@ export default function HODSection({
                 style={{
                   fontSize: "1.25rem",
                   fontWeight: "700",
-                  color: "#ffffff",
+                  color: "#0f1c2c",
                   marginBottom: "0.25rem",
                   fontFamily: "Georgia, serif",
                 }}
@@ -132,7 +138,7 @@ export default function HODSection({
               <p
                 style={{
                   fontSize: "0.875rem",
-                  color: "#94a3b8",
+                  color: "#64748b",
                   maxWidth: "280px",
                 }}
               >
@@ -151,10 +157,10 @@ export default function HODSection({
             <div
               style={{
                 background:
-                  "linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)",
+                  "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
                 borderRadius: "16px",
                 padding: "2rem",
-                border: "1px solid rgba(148, 163, 184, 0.1)",
+                border: "1px solid rgba(148, 163, 184, 0.4)",
                 position: "relative",
                 overflow: "hidden",
               }}
@@ -166,7 +172,7 @@ export default function HODSection({
                   top: "1rem",
                   left: "1.5rem",
                   fontSize: "4rem",
-                  color: "rgba(6, 182, 212, 0.15)",
+                  color: "rgba(6, 182, 212, 0.2)",
                   fontFamily: "Georgia, serif",
                   lineHeight: 1,
                 }}
@@ -176,9 +182,9 @@ export default function HODSection({
 
               <p
                 style={{
-                  fontSize: "1.1rem",
+                  fontSize: "1.05rem",
                   lineHeight: "1.8",
-                  color: "#e2e8f0",
+                  color: "#3f4c5d",
                   fontFamily: "Georgia, serif",
                   fontStyle: "italic",
                   paddingTop: "2rem",
@@ -193,7 +199,7 @@ export default function HODSection({
                 style={{
                   marginTop: "1.5rem",
                   paddingTop: "1rem",
-                  borderTop: "1px solid rgba(148, 163, 184, 0.2)",
+                  borderTop: "1px solid rgba(148, 163, 184, 0.4)",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.75rem",
