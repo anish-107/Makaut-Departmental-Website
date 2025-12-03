@@ -120,6 +120,40 @@ def get_all_programs() -> List[Dict[str, Any]]:
             conn.close()
 
 
+def update_program(
+    program_id: int,
+    code: Optional[str],
+    name: Optional[str],
+    duration: Optional[int],
+    level: Optional[str],
+    description: Optional[str],
+) -> int:
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            sql = """
+                UPDATE programs
+                SET code = COALESCE(%s, code),
+                    name = COALESCE(%s, name),
+                    duration = COALESCE(%s, duration),
+                    level = COALESCE(%s, level),
+                    description = COALESCE(%s, description)
+                WHERE program_id = %s
+            """
+            cur.execute(sql, (code, name, duration, level, description, program_id))
+            conn.commit()
+            return cur.rowcount
+    except Exception as exc:
+        if conn:
+            conn.rollback()
+        print("[ERROR] update_program:", exc)
+        return 0
+    finally:
+        if conn:
+            conn.close()
+
+
 def add_program(code: str, name: str, duration: str, level: str, description: Optional[str]) -> int:
     conn: Optional[pymysql.connections.Connection] = None
     try:
@@ -1070,6 +1104,60 @@ def is_token_revoked(jti: str) -> bool:
         print("[ERROR] is_token_revoked:", exc)
         # safer to treat token as revoked on DB error
         return True
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_admin_by_login_id(login_id: str) -> Optional[Dict]:
+    """
+    Return admin row by login_id or None.
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
+            sql = "SELECT admin_id, login_id, name, email, password FROM admins WHERE login_id=%s LIMIT 1"
+            cur.execute(sql, (login_id,))
+            row = cur.fetchone()
+            return row
+    except Exception as exc:
+        print("[ERROR] get_admin_by_login_id:", exc)
+        return None
+    finally:
+        if conn:
+            conn.close()
+
+
+def update_admin(
+    admin_id: int,
+    name: Optional[str],
+    email: Optional[str],
+    password: Optional[str],
+) -> int:
+    """
+    Update admins table. Uses COALESCE to keep fields unchanged when None is passed.
+    Returns number of affected rows.
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor() as cur:
+            sql = """
+                UPDATE admins
+                SET name = COALESCE(%s, name),
+                    email = COALESCE(%s, email),
+                    password = COALESCE(%s, password)
+                WHERE admin_id = %s
+            """
+            cur.execute(sql, (name, email, password, admin_id))
+            conn.commit()
+            return cur.rowcount
+    except Exception as exc:
+        if conn:
+            conn.rollback()
+        print("[ERROR] update_admin:", exc)
+        return 0
     finally:
         if conn:
             conn.close()

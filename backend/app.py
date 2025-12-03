@@ -7,11 +7,16 @@
 
 from __future__ import annotations
 from typing import Dict, Optional, Tuple, Union, List, Any
-from os import getenv
+from os import getenv, makedirs, SEEK_END, path
 from datetime import timedelta, datetime
-from flask import Flask, jsonify, request, Response
+import time  
+import io
+from werkzeug.utils import secure_filename
+from flask import Flask, jsonify, request, Response, send_from_directory, make_response
 from flask_cors import CORS
 from dotenv import load_dotenv
+import uuid
+from werkzeug.utils import secure_filename
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
@@ -23,12 +28,15 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_jwt,
 )
-from src.utils import now_mysql
+from src.utils import now_mysql, allowed_file
 from src.db import (
+    get_admin_by_login,
+    update_admin,
     # programs
     get_all_programs,
     add_program,
     delete_program,
+    update_program,
     # subjects
     get_all_subjects,
     get_subjects_by_program,
@@ -84,6 +92,13 @@ load_dotenv()
 app.config["HOST"] = getenv("HOST", "")
 app.config["PORT"] = getenv("PORT", "8080")
 app.config["DEV_ENV"] = getenv("DEV_ENV", "False")
+
+UPLOAD_FOLDER = getenv("SCHEDULE_UPLOAD_FOLDER", "uploads/schedules")
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config["SCHEDULE_UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024 
 
 # JWT config (cookies)
 app.config["JWT_SECRET_KEY"] = getenv("JWT_SECRET_KEY", "replace-this-secret")
@@ -321,6 +336,40 @@ def route_delete_program(program_id: int) -> FlaskReturn:
         return jsonify({"message": "Program not found"}), 404
     return jsonify({"message": "Program deleted", "affected_rows": affected}), 200
 
+@app.route("/programs/update/<int:program_id>", methods=["OPTIONS", "PUT"])
+@jwt_required(optional=False)
+def route_update_program(program_id: int):
+    # handle preflight
+    if request.method == "OPTIONS":
+        resp = make_response("", 204)
+        resp.headers["Access-Control-Allow-Origin"] = request.headers.get("Origin", "*")
+        resp.headers["Access-Control-Allow-Methods"] = "PUT, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-CSRF-TOKEN"
+        resp.headers["Access-Control-Allow-Credentials"] = "true"
+        return resp
+
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Forbidden"}), 403
+
+    data: Dict[str, Any] = request.get_json(silent=True) or {}
+    code = data.get("code")
+    name = data.get("name")
+    duration = data.get("duration")
+    level = data.get("level")
+    description = data.get("description")
+
+    # basic validation
+    if not name and not code and duration is None and not level and description is None:
+        return jsonify({"error": "No fields to update"}), 400
+
+    try:
+        affected = update_program(program_id, code, name, duration, level, description)
+    except Exception as exc:
+        print("[ERROR] route_update_program:", exc)
+        return jsonify({"error": "Failed to update program"}), 500
+
+    return jsonify({"message": "Program updated", "affected_rows": affected}), 200
 
 # -------------------------
 # SUBJECT ROUTES
@@ -689,6 +738,10 @@ def route_get_all_schedules() -> FlaskReturn:
     rows = get_all_schedules()
     return jsonify(rows), 200
 
+@app.get("/media/schedules/<path:filename>")
+def serve_schedule_image(filename):
+    return send_from_directory(app.config["SCHEDULE_UPLOAD_FOLDER"], filename)
+
 
 @app.get("/schedule/by-program")
 def route_get_schedules_by_program_sem() -> FlaskReturn:
@@ -710,6 +763,60 @@ def route_get_schedules_by_program_sem() -> FlaskReturn:
 
     rows = get_schedules_by_program_sem(prog_i, sem_i)
     return jsonify(rows), 200
+
+@app.post("/upload/schedule-image")
+@jwt_required()
+def route_upload_schedule_image() -> FlaskReturn:
+    """
+    Upload a schedule image file. Protected: teacher/admin.
+    Multipart form: field 'file' required.
+    Returns: { image_url: "/media/schedules/<filename>" }
+    """
+    claims = get_jwt()
+    if claims.get("role") not in ("admin", "teacher"):
+        return jsonify({"error": "Forbidden"}), 403
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["file"]
+    if not file:
+        return jsonify({"error": "No file provided"}), 400
+
+    # normalize filename to a guaranteed str for type-checkers
+    filename: str = file.filename or ""
+    if filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    if not allowed_file(filename):
+        return jsonify({"error": "Unsupported file type"}), 400
+
+    # optional size check (server will also block larger than MAX_CONTENT_LENGTH)
+    try:
+        # use io.SEEK_END to avoid NameError for SEEK_END
+        file.seek(0, io.SEEK_END)
+        size = file.tell()
+        file.seek(0)
+        max_len = app.config.get("MAX_CONTENT_LENGTH", 8 * 1024 * 1024)
+        if size > max_len:
+            return jsonify({"error": "File too large"}), 400
+    except Exception:
+        # if seek/tell fails, continue and let save() or server limits handle it
+        pass
+
+    # safe filename + small random prefix to avoid collision
+    safe = secure_filename(filename)
+    filename_final = f"{int(time.time())}-{uuid.uuid4().hex[:8]}-{safe}"
+    save_path = path.join(app.config["SCHEDULE_UPLOAD_FOLDER"], filename_final)
+
+    try:
+        file.save(save_path)
+    except Exception as e:
+        print("[ERROR] saving schedule file:", e)
+        return jsonify({"error": "Failed to save file"}), 500
+
+    image_url = f"/media/schedules/{filename_final}"
+    return jsonify({"image_url": image_url}), 201
 
 @app.delete("/schedule/delete/<int:schedule_id>")
 @jwt_required()
@@ -1010,6 +1117,45 @@ def route_register_teacher() -> FlaskReturn:
         return jsonify({"error": "Failed to register teacher"}), 500
 
     return jsonify({"message": "Teacher registered", "teacher_id": inserted_id, "login_id": login_id}), 201
+
+
+@app.put("/admins/update/<int:admin_id>")
+@jwt_required()
+def route_update_admin(admin_id: int):
+    """
+    Update an admin.
+    Expects JSON: { name?, email?, password? }
+
+    Protected:
+      - only admin role can update admins (you can adjust to allow self-updates by other roles if needed)
+    """
+    claims = get_jwt()
+    role = claims.get("role")
+    identity = get_jwt_identity()  # login_id string like "83xxxxxx" (if you use login_id scheme)
+
+    # ----- permission check -----
+    # Only allow users with role 'admin' to hit this endpoint
+    if role != "admin":
+        return jsonify({"error": "Forbidden"}), 403
+
+    # ----- read body -----
+    data: Dict[str, Any] = request.get_json(silent=True) or {}
+    name = data.get("name")
+    email = data.get("email")
+    password = data.get("password")
+
+    # basic validation: ensure at least one field is present
+    if name is None and email is None and password is None:
+        return jsonify({"error": "No fields to update"}), 400
+
+    try:
+        affected: int = update_admin(admin_id, name, email, password)
+    except Exception as exc:
+        # keep this behavior consistent with your other routes
+        print("[ERROR] route_update_admin:", exc)
+        return jsonify({"error": "Failed to update admin"}), 500
+
+    return jsonify({"message": "Admin updated", "affected_rows": affected}), 200
 
 
 # Run the script

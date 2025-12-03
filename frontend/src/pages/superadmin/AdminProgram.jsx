@@ -1,71 +1,77 @@
-/** AdminStudent.jsx
- * @author Anish
- * @description This is the jsx file for Admin Panel Student
- * @date 2-12-2025
- * @returns a JSX Layout
+/**
+ * AdminProgram.jsx
+ * @author Anish (converted)
+ * @description Admin Programs management page — list, add, delete (and attempt update when available)
+ * @date 03-12-2025
  */
 
 import React, { useEffect, useState } from "react";
-import { PlusCircle, Pencil, Trash2, X, IdCard, Mail } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, X, ExternalLink } from "lucide-react";
 import { getAccessCsrfToken } from "@/utils/csrf";
+import { useAuth } from "@/hooks/useAuth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8080";
 
-export default function AdminStudent() {
-  const [students, setStudents] = useState([]);
+export default function AdminProgram() {
+  useAuth();
+
+  const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  // form fields
+  // form fields for program
+  const [code, setCode] = useState("");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rollNo, setRollNo] = useState("");
-  const [semester, setSemester] = useState("");
-  const [programId, setProgramId] = useState("");
+  const [duration, setDuration] = useState("");
+  const [level, setLevel] = useState("");
+  const [description, setDescription] = useState("");
 
   // delete confirmation
   const [deleteId, setDeleteId] = useState(null);
 
-  // special: show last generated login_id when registering student
-  const [lastLoginId, setLastLoginId] = useState("");
+  // feedback
+  const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   // -----------------------------
-  // FETCH ALL STUDENTS
+  // FETCH ALL PROGRAMS
   // -----------------------------
-  async function loadStudents() {
+  async function loadPrograms() {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/students/all`);
+      const res = await fetch(`${API_BASE_URL}/programs/all`);
       const data = await res.json();
-      setStudents(data || []);
+      setPrograms(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Failed to fetch students", err);
+      console.error("Failed to fetch programs", err);
+      setPrograms([]);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadStudents();
+    loadPrograms();
   }, []);
 
   // -----------------------------
-  // OPEN ADD MODAL (REGISTER STUDENT)
+  // OPEN ADD MODAL
   // -----------------------------
   function openAddModal() {
     setEditMode(false);
     setSelectedId(null);
+    setCode("");
     setName("");
-    setEmail("");
-    setPassword("");
-    setRollNo("");
-    setSemester("");
-    setProgramId("");
+    setDuration("");
+    setLevel("");
+    setDescription("");
+    setErrorMsg("");
+    setSuccessMsg("");
     setModalOpen(true);
   }
 
@@ -74,39 +80,54 @@ export default function AdminStudent() {
   // -----------------------------
   function openEditModal(item) {
     setEditMode(true);
-    setSelectedId(item.student_id);
+    setSelectedId(item.program_id);
+    setCode(item.code || "");
     setName(item.name || "");
-    setEmail(item.email || "");
-    // do not prefill password for security; user can set new one
-    setPassword("");
-    setRollNo(item.roll_no || "");
-    setSemester(item.semester != null ? String(item.semester) : "");
-    setProgramId(item.program_id != null ? String(item.program_id) : "");
+    setDuration(item.duration ? String(item.duration) : "");
+    setLevel(item.level || "");
+    setDescription(item.description || "");
+    setErrorMsg("");
+    setSuccessMsg("");
     setModalOpen(true);
   }
 
   // -----------------------------
-  // ADD (REGISTER) / UPDATE STUDENT
+  // ADD / UPDATE PROGRAM
   // -----------------------------
   async function handleSubmit(e) {
     e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    // basic validation
+    if (!code || !name || !duration || !level) {
+      setErrorMsg("Please fill code, name, duration and level.");
+      return;
+    }
+
+    // duration should be numeric
+    const durationI = parseInt(duration, 10);
+    if (Number.isNaN(durationI) || durationI <= 0) {
+      setErrorMsg("Duration must be a positive integer.");
+      return;
+    }
 
     const csrf = getAccessCsrfToken();
-
-    // Common payload
     const payload = {
+      code,
       name,
-      email,
-      password: password || undefined, // backend treats missing as "no change" on update
-      roll_no: rollNo || undefined,
-      semester: semester || undefined,
-      program_id: programId || undefined,
+      duration: durationI,
+      level,
+      description,
     };
 
     try {
+      setSaving(true);
+
       if (editMode) {
-        // UPDATE existing student
-        await fetch(`${API_BASE_URL}/students/update/${selectedId}`, {
+        // Try to call update endpoint if it exists. If backend doesn't have it,
+        // the call will likely 404 — show the error to the user.
+        const res = await fetch(`${API_BASE_URL}/programs/update/${selectedId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -116,10 +137,22 @@ export default function AdminStudent() {
           body: JSON.stringify(payload),
         });
 
-        setLastLoginId(""); // not a new registration
+        if (!res.ok) {
+          // if update endpoint is not present or update fails, surface message
+          const data = await res.json().catch(() => ({}));
+          const msg =
+            data?.error ||
+            data?.message ||
+            `Failed to update program (status ${res.status}).`;
+          setErrorMsg(msg);
+          // don't silently fall back to add — editing without backend update could create duplicates
+          return;
+        }
+
+        setSuccessMsg("Program updated successfully.");
       } else {
-        // REGISTER new student via /students/add
-        const res = await fetch(`${API_BASE_URL}/students/add`, {
+        // Add new program
+        const res = await fetch(`${API_BASE_URL}/programs/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -130,28 +163,36 @@ export default function AdminStudent() {
         });
 
         const data = await res.json().catch(() => ({}));
-        if (res.ok && data?.login_id) {
-          setLastLoginId(data.login_id);
-        } else {
-          setLastLoginId("");
+        if (!res.ok) {
+          setErrorMsg(
+            data?.error || data?.message || `Failed to add program (status ${res.status}).`
+          );
+          return;
         }
+
+        setSuccessMsg("Program added successfully.");
       }
 
       setModalOpen(false);
-      loadStudents();
+      loadPrograms();
     } catch (err) {
-      console.error("Failed to save student", err);
+      console.error("Failed to save program", err);
+      setErrorMsg("Network error while saving program.");
+    } finally {
+      setSaving(false);
     }
   }
 
   // -----------------------------
-  // DELETE STUDENT
+  // DELETE PROGRAM
   // -----------------------------
   async function confirmDelete() {
+    setErrorMsg("");
+    setSuccessMsg("");
     const csrf = getAccessCsrfToken();
 
     try {
-      await fetch(`${API_BASE_URL}/students/delete/${deleteId}`, {
+      const res = await fetch(`${API_BASE_URL}/programs/delete/${deleteId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -160,10 +201,18 @@ export default function AdminStudent() {
         credentials: "include",
       });
 
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setErrorMsg(data?.error || `Delete failed (status ${res.status}).`);
+        return;
+      }
+
       setDeleteId(null);
-      loadStudents();
+      setSuccessMsg("Program deleted.");
+      loadPrograms();
     } catch (err) {
       console.error("Delete failed", err);
+      setErrorMsg("Network error while deleting program.");
     }
   }
 
@@ -174,7 +223,7 @@ export default function AdminStudent() {
     <div className="p-6">
       {/* PAGE HEADER */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-grey-600">Manage Students</h2>
+        <h2 className="text-2xl font-semibold text-grey-600">Manage Programs</h2>
 
         <button
           onClick={openAddModal}
@@ -184,28 +233,34 @@ export default function AdminStudent() {
                      hover:shadow-cyan-500/40 transition-all duration-300 hover:scale-105"
         >
           <PlusCircle className="w-5 h-5" />
-          Register Student
+          Add Program
         </button>
       </div>
 
-      {/* LAST GENERATED LOGIN ID BANNER */}
-      {lastLoginId && (
-        <div className="mb-4 rounded-xl border border-emerald-500/80 bg-emerald-800/90 
-                        px-4 py-3 text-sm text-emerald-50 flex items-center justify-between 
-                        shadow-lg shadow-emerald-500/40">
+      {/* ALERTS */}
+      {errorMsg && (
+        <div className="mb-4 rounded-xl border border-red-500/70 bg-red-900/80 px-4 py-3 text-sm text-red-50 flex items-center justify-between shadow-lg shadow-red-500/40">
           <div className="flex items-center gap-2">
-            <IdCard className="w-4 h-4 text-emerald-200" />
-            <span className="font-semibold">New student registered.</span>
-            <span className="opacity-90">
-              Login ID:{" "}
-              <span className="ml-1 inline-flex items-center rounded-full bg-emerald-600 px-2 py-0.5 
-                              font-mono text-xs font-semibold text-emerald-50 shadow-inner">
-                {lastLoginId}
-              </span>
-            </span>
+            <Trash2 className="w-4 h-4" />
+            <span>{errorMsg}</span>
           </div>
           <button
-            onClick={() => setLastLoginId("")}
+            onClick={() => setErrorMsg("")}
+            className="text-red-100 hover:text-white text-xs font-medium underline decoration-dotted"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {successMsg && (
+        <div className="mb-4 rounded-xl border border-emerald-500/70 bg-emerald-900/80 px-4 py-3 text-sm text-emerald-50 flex items-center justify-between shadow-lg shadow-emerald-500/40">
+          <div className="flex items-center gap-2">
+            <ExternalLink className="w-4 h-4" />
+            <span>{successMsg}</span>
+          </div>
+          <button
+            onClick={() => setSuccessMsg("")}
             className="text-emerald-100 hover:text-white text-xs font-medium underline decoration-dotted"
           >
             Dismiss
@@ -213,30 +268,25 @@ export default function AdminStudent() {
         </div>
       )}
 
-
-
       {/* TABLE */}
       <div className="bg-[#0b1220]/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl">
         <table className="w-full text-sm text-left text-slate-200">
           <thead className="bg-gradient-to-r from-cyan-600/30 to-blue-600/30 border-b border-white/20">
             <tr>
               <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
-                Login ID
+                Code
               </th>
               <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
                 Name
               </th>
               <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
-                Email
+                Duration
               </th>
               <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
-                Roll No
+                Level
               </th>
               <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
-                Semester
-              </th>
-              <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs">
-                Program ID
+                Description
               </th>
               <th className="px-5 py-4 font-semibold tracking-wide uppercase text-xs text-right">
                 Actions
@@ -247,46 +297,30 @@ export default function AdminStudent() {
           <tbody>
             {loading && (
               <tr>
-                <td
-                  colSpan="7"
-                  className="text-center py-6 text-slate-400 italic"
-                >
-                  Loading students...
+                <td colSpan="6" className="text-center py-6 text-slate-400 italic">
+                  Loading programs...
                 </td>
               </tr>
             )}
 
-            {!loading && students.length === 0 && (
+            {!loading && programs.length === 0 && (
               <tr>
-                <td
-                  colSpan="7"
-                  className="text-center py-6 text-slate-400 italic"
-                >
-                  No students found.
+                <td colSpan="6" className="text-center py-6 text-slate-400 italic">
+                  No programs found.
                 </td>
               </tr>
             )}
 
-            {students.map((item, idx) => (
+            {programs.map((item, idx) => (
               <tr
-                key={item.student_id}
-                className={`transition-all ${
-                  idx % 2 === 0 ? "bg-white/5" : "bg-white/10"
-                } hover:bg-cyan-500/20`}
+                key={item.program_id}
+                className={`transition-all ${idx % 2 === 0 ? "bg-white/5" : "bg-white/10"} hover:bg-cyan-500/20`}
               >
-                <td className="px-5 py-4 font-mono text-[13px]">
-                  {item.login_id}
-                </td>
+                <td className="px-5 py-4 text-[15px] font-mono">{item.code}</td>
                 <td className="px-5 py-4 text-[15px]">{item.name}</td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-2 max-w-xs">
-                    <Mail className="w-4 h-4 text-cyan-300" />
-                    <span className="truncate">{item.email}</span>
-                  </div>
-                </td>
-                <td className="px-5 py-4">{item.roll_no || "—"}</td>
-                <td className="px-5 py-4">{item.semester ?? "—"}</td>
-                <td className="px-5 py-4">{item.program_id ?? "—"}</td>
+                <td className="px-5 py-4 text-[15px]">{item.duration}</td>
+                <td className="px-5 py-4 text-[15px]">{item.level}</td>
+                <td className="px-5 py-4 text-[15px] max-w-sm truncate">{item.description}</td>
 
                 <td className="px-5 py-4">
                   <div className="flex items-center justify-end gap-4">
@@ -294,13 +328,14 @@ export default function AdminStudent() {
                     <button
                       onClick={() => openEditModal(item)}
                       className="text-cyan-300 hover:text-cyan-400 hover:scale-110 transition-transform duration-150"
+                      title="Edit (only if backend supports /programs/update/:id)"
                     >
                       <Pencil className="w-5 h-5" />
                     </button>
 
                     {/* DELETE */}
                     <button
-                      onClick={() => setDeleteId(item.student_id)}
+                      onClick={() => setDeleteId(item.program_id)}
                       className="text-red-400 hover:text-red-500 hover:scale-110 transition-transform duration-150"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -327,13 +362,27 @@ export default function AdminStudent() {
             </button>
 
             <h3 className="text-xl font-semibold text-white mb-4">
-              {editMode ? "Edit Student" : "Register Student"}
+              {editMode ? "Edit Program" : "Add Program"}
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* CODE */}
+              <div>
+                <label className="text-slate-300 text-sm">Program Code</label>
+                <input
+                  className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
+                             focus:ring-2 focus:ring-cyan-500 text-white outline-none"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                  placeholder="eg. MCA-FT, MTECH-CSE"
+                  disabled={editMode} // code often should be immutable; don't allow editing by default
+                />
+              </div>
+
               {/* NAME */}
               <div>
-                <label className="text-slate-300 text-sm">Name</label>
+                <label className="text-slate-300 text-sm">Program Name</label>
                 <input
                   className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
                              focus:ring-2 focus:ring-cyan-500 text-white outline-none"
@@ -343,89 +392,57 @@ export default function AdminStudent() {
                 />
               </div>
 
-              {/* EMAIL */}
+              {/* DURATION */}
               <div>
-                <label className="text-slate-300 text-sm">Email</label>
+                <label className="text-slate-300 text-sm">Duration (years)</label>
                 <input
-                  type="email"
+                  type="number"
+                  min="1"
                   className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
                              focus:ring-2 focus:ring-cyan-500 text-white outline-none"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
                   required
                 />
               </div>
 
-              {/* PASSWORD */}
+              {/* LEVEL */}
               <div>
-                <label className="text-slate-300 text-sm">
-                  {editMode ? "New Password (optional)" : "Password"}
-                </label>
-                <input
-                  type="password"
-                  className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
-                             focus:ring-2 focus:ring-cyan-500 text-white outline-none"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required={!editMode}
-                  placeholder={editMode ? "Leave blank to keep current" : ""}
-                />
-              </div>
-
-              {/* ROLL NO */}
-              <div>
-                <label className="text-slate-300 text-sm">
-                  Roll No <span className="text-slate-500 text-xs">(optional)</span>
-                </label>
+                <label className="text-slate-300 text-sm">Level</label>
                 <input
                   className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
                              focus:ring-2 focus:ring-cyan-500 text-white outline-none"
-                  value={rollNo}
-                  onChange={(e) => setRollNo(e.target.value)}
+                  value={level}
+                  onChange={(e) => setLevel(e.target.value)}
+                  required
+                  placeholder="eg. Undergraduate / Postgraduate / Diploma"
                 />
               </div>
 
-              {/* SEMESTER & PROGRAM ID */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-slate-300 text-sm">
-                    Semester{" "}
-                    <span className="text-slate-500 text-xs">(optional)</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
-                               focus:ring-2 focus:ring-cyan-500 text-white outline-none"
-                    value={semester}
-                    onChange={(e) => setSemester(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-slate-300 text-sm">
-                    Program ID{" "}
-                    <span className="text-slate-500 text-xs">(optional)</span>
-                  </label>
-                  <input
-                    type="number"
-                    className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
-                               focus:ring-2 focus:ring-cyan-500 text-white outline-none"
-                    value={programId}
-                    onChange={(e) => setProgramId(e.target.value)}
-                  />
-                </div>
+              {/* DESCRIPTION */}
+              <div>
+                <label className="text-slate-300 text-sm">
+                  Description <span className="text-slate-500 text-xs">(optional)</span>
+                </label>
+                <textarea
+                  rows="4"
+                  className="w-full mt-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 
+                             focus:ring-2 focus:ring-cyan-500 text-white outline-none"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </div>
 
               {/* SUBMIT BUTTON */}
               <button
                 type="submit"
+                disabled={saving}
                 className="w-full rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 
                            hover:from-cyan-400 hover:to-blue-400 text-white py-2 text-lg font-medium
                            shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 
                            transition-all duration-300 hover:scale-[1.03]"
               >
-                {editMode ? "Save Changes" : "Register Student"}
+                {saving ? "Saving..." : editMode ? "Save Changes" : "Add Program"}
               </button>
             </form>
           </div>
@@ -438,12 +455,8 @@ export default function AdminStudent() {
       {deleteId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-[#0d1d35] border border-white/10 rounded-xl p-6 w-full max-w-sm shadow-xl text-center">
-            <h3 className="text-white text-lg font-semibold mb-2">
-              Delete Student?
-            </h3>
-            <p className="text-slate-400 text-sm mb-4">
-              This action cannot be undone.
-            </p>
+            <h3 className="text-white text-lg font-semibold mb-2">Delete Program?</h3>
+            <p className="text-slate-400 text-sm mb-4">This action cannot be undone.</p>
 
             <div className="flex items-center justify-center gap-3">
               <button

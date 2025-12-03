@@ -39,7 +39,7 @@ const FacultyStudents = lazy(() => import('@/pages/faculty/FacultyStudents'))
 
 // Admin Pages
 const AdminHome = lazy(() => import('@/pages/superadmin/AdminHome'))
-const AdminProfile = lazy(() => import('@/pages/superadmin/AdminProfile'))
+const AdminProgram = lazy(() => import('@/pages/superadmin/AdminProgram'))
 const AdminEvent = lazy(() => import('@/pages/superadmin/AdminEvent'))
 const AdminJob = lazy(() => import('@/pages/superadmin/AdminJob'))
 const AdminNotice = lazy(() => import('@/pages/superadmin/AdminNotice'))
@@ -116,7 +116,7 @@ export default function App() {
               }
             >
               <Route index element={<AdminHome />} />
-              <Route path="profile" element={<AdminProfile />} />
+              <Route path="program" element={<AdminProgram />} />
               <Route path="notices" element={<AdminNotice />} />
               <Route path="schedule" element={<AdminSchedule />} />
               <Route path="students" element={<AdminStudent />} />

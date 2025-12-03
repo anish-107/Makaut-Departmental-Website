@@ -8,7 +8,7 @@
 
 
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, User, Bell, Calendar, PartyPopper, Briefcase, GraduationCap, School, Book } from "lucide-react"
+import { LayoutDashboard, User, Bell, Calendar, PartyPopper, Briefcase, GraduationCap, School, Book, BookOpen } from "lucide-react"
 
 export default function AdminSidebar({ open, onClose, user }) {
   const { pathname } = useLocation()
@@ -20,7 +20,7 @@ export default function AdminSidebar({ open, onClose, user }) {
 
   const menu = [
     { name: "Dashboard", to: "/admin", icon: LayoutDashboard },
-    { name: "Profile", to: "/admin/profile", icon: User },
+    { name: "Programs", to: "/admin/program", icon: BookOpen },
     { name: "Students", to: "/admin/students", icon: GraduationCap },
     { name: "Faculty", to: "/admin/faculty", icon: School },
     { name: "Notices", to: "/admin/notices", icon: Bell },

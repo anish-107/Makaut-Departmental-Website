@@ -153,7 +153,7 @@ export default function AdminNotice() {
     <div className="p-6">
       {/* PAGE HEADER */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-white">Manage Notices</h2>
+        <h2 className="text-2xl font-semibold text-grey-600">Manage Notices</h2>
 
         <button
           onClick={openAddModal}
