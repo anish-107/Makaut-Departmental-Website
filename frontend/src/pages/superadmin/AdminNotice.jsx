@@ -5,6 +5,11 @@
  * @returns a JSX Layout
  */
 
+/**
+ * AdminNotices.jsx - Standalone CRUD Page
+ * Fully functional: List + Add + Edit + Delete
+ * Works with your existing backend routes
+ */
 
 import React, { useEffect, useState } from "react";
 import { PlusCircle, Pencil, Trash2, X } from "lucide-react";

@@ -1,0 +1,152 @@
+/* ================================
+   MAIN CARD SECTION
+================================ */
+.select-section {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  margin-bottom: 40px;
+}
+
+/* ================================
+   DROP-DOWN ROW
+================================ */
+.select-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+  gap: 30px;
+}
+
+.select-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.select-box label {
+  margin-bottom: 10px;
+  color: #003b73;
+}
+
+.select-box select {
+  padding: 14px;
+  border-radius: 10px;
+  border: 2px solid #b6c5d1;
+  font-size: 16px;
+  background: #fdfdfd;
+  cursor: pointer;
+  transition: 0.25s ease-in-out;
+}
+
+.select-box select:focus {
+  border-color: #4aa3ff;
+  background: white;
+}
+
+/* ================================
+   BUTTONS
+================================ */
+.result-btn-row {
+  margin-top: 35px;
+  display: flex;
+  gap: 15px;
+}
+
+.view-marks-btn {
+  background: #0949a5;
+  color: white;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.view-marks-btn:hover {
+  background: #073e8a;
+}
+
+.cancel-btn {
+  background: #e74c3c;
+  color: white;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.cancel-btn:hover {
+  background: #c0392b;
+}
+
+/* Makes bottom buttons align nicely when table pushes content */
+.bottom-btns {
+  margin-top: 40px;
+}
+
+/* ================================
+   COURSE REGISTERED SECTION
+================================ */
+.course-title {
+  margin-top: 10px;
+  margin-bottom: 15px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #003b73;
+}
+
+.course-table-container {
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 14px rgba(0,0,0,0.08);
+}
+
+/* TABLE HEADER */
+.course-table th {
+  background: #334f6d;
+  color: white;
+  padding: 12px;
+  font-size: 15px;
+  text-align: left;
+}
+
+/* TABLE BODY ROWS */
+.course-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Alternate row styling */
+.course-table tr:nth-child(even) {
+  background: #f6f8fb;
+}
+
+/* Smooth table hover for better UX */
+.course-table tr:hover {
+  background: #eaf2ff;
+  transition: 0.2s;
+}
+
+.session-info {
+  font-size: 18px;
+  font-weight: 600;
+  color: #003b73;
+  margin: 10px 0 20px 0;
+}

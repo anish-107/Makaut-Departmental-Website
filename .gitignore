@@ -1,27 +1,21 @@
 # Write any file that you want to exclude from the repo here
 
 # Documents
-**/*.pdf
+
 
 # Executables
-**/*.exe
+
 
 
 # Environment
-**/.env
-**/venv/
+
 
 
 # Scripts
-**/*.sh
-**/*.ps1
-
-
 
 # IDE
 .vscode/
 **/.vscode/
-
 
 # Misc
 

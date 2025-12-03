@@ -1,0 +1,48 @@
+.faculty-profile-page {
+  padding: 30px;
+}
+
+.faculty-profile-card {
+  width: 420px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+  text-align: left;
+}
+
+.faculty-image-wrapper {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+}
+
+.faculty-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.faculty-details p {
+  font-size: 16px;
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.update-profile-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #1a2a40;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.update-profile-btn:hover {
+  background: #0f1c2f;
+}

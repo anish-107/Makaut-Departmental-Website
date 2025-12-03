@@ -1,4 +1,4 @@
-""" db.py
+"""
 @author Anish
 @description Database helpers for the college system (programs/subjects/people/schedules)
 @date 01/12/2025

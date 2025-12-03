@@ -1,0 +1,42 @@
+.faculty-page {
+  padding: 20px;
+}
+
+.faculty-page-subheader {
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 8px;
+}
+
+.faculty-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.faculty-card-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #d0f2e3;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.faculty-message-btn {
+  background: #15827a;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.faculty-message-btn:hover {
+  background: #0d6d5f;
+}
