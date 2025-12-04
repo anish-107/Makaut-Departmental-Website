@@ -6,7 +6,7 @@
  */
 
 import "@/index.css";
-import HodImage from "@/assets/Common/hod.png";
+import HodImage from "@/assets/self/hod.png";
 
 export default function HODSection({
   hodImage = HodImage,

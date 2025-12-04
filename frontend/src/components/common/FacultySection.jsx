@@ -1,17 +1,17 @@
 // src/components/home/FacultySection.jsx
 import React from "react";
 import FacultyCard from "./FacultyCard";
-import Faculty1 from "@/assets/Common/faculty1.jpg";
-import Faculty2 from "@/assets/Common/faculty2.jpg";
-import Faculty3 from "@/assets/Common/faculty3.jpg";
-import Faculty4 from "@/assets/Common/faculty4.jpg";
-import Faculty5 from "@/assets/Common/faculty5.jpg";
-import Faculty6 from "@/assets/Common/faculty6.jpg";
-import Faculty7 from "@/assets/Common/faculty7.jpg";
-import Faculty8 from "@/assets/Common/faculty8.jpg";
-import Faculty9 from "@/assets/Common/faculty9.jpg";
-import Faculty10 from "@/assets/Common/faculty10.jpg";
-import Faculty11 from "@/assets/Common/faculty11.jpg";
+import Faculty1 from "@/assets/self/faculty1.jpg";
+import Faculty2 from "@/assets/self/faculty2.jpg";
+import Faculty3 from "@/assets/self/faculty3.jpg";
+import Faculty4 from "@/assets/self/faculty4.jpg";
+import Faculty5 from "@/assets/self/faculty5.jpg";
+import Faculty6 from "@/assets/self/faculty6.jpg";
+import Faculty7 from "@/assets/self/faculty7.jpg";
+import Faculty8 from "@/assets/self/faculty8.jpg";
+import Faculty9 from "@/assets/self/faculty9.jpg";
+import Faculty10 from "@/assets/self/faculty10.jpg";
+import Faculty11 from "@/assets/self/faculty11.jpg";
 
 
 const defaultFaculty = [

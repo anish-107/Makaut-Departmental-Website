@@ -6,9 +6,9 @@
  */
 
 import ProjectCard from "./ProjectCard";
-import Project1 from "@/assets/Common/project1.jpg";
-import Project2 from "@/assets/Common/project1.png";
-import Project3 from "@/assets/Common/project1.jpg";
+import Project1 from "@/assets/self/project1.png";
+import Project2 from "@/assets/self/project1.png";
+
 
 const highlightedProjects = [
   {

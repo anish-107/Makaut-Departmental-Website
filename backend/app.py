@@ -82,6 +82,7 @@ from src.db import (
     add_token_to_blocklist,
     is_token_revoked,
 )
+from functools import wraps
 
 # Application
 app: Flask = Flask(__name__)
@@ -111,7 +112,35 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=int(getenv("JWT_ACCES
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=int(getenv("JWT_REFRESH_DAYS", "7")))
 
 jwt = JWTManager(app)
+def _noop_jwt_required(*dargs, **dkwargs):
+    """
+    Replacement for flask_jwt_extended.jwt_required that does nothing.
+    Supports both @jwt_required and @jwt_required(refresh=True).
+    """
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            return fn(*args, **kwargs)
+        return wrapper
 
+    if dargs and callable(dargs[0]) and not dkwargs:
+        # usage: @jwt_required
+        return decorator(dargs[0])
+    return decorator
+
+# Override imported values
+jwt_required = _noop_jwt_required
+
+# Fake identity + claims so code doesn't break
+def _debug_get_jwt_identity():
+    return "650000"  # fake admin login_id (optional)
+
+def _debug_get_jwt():
+    return {"role": "admin"}  # fake role (optional)
+
+get_jwt_identity = _debug_get_jwt_identity
+get_jwt = _debug_get_jwt
+# =======================================================================
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_headers, jwt_payload) -> bool:

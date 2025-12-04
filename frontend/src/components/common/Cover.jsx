@@ -5,7 +5,7 @@
  * @returns JSX Component
  */
 
-import CoverImg from "@/assets/common/cover.jpg";
+import CoverImg from "@/assets/self/cover.jpg";
 
 export default function Cover() {
   return (

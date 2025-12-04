@@ -5,14 +5,13 @@
  * @returns a JSX component
  */
 
-import React from 'react';
-import Cover from '@/components/common/Cover';
-import HODSection from '@/components/common/HODSection';
-import Projects from '@/components/common/Proejcts';
-import FacultySection from '@/components/common/FacultySection';
-import ResearchSection from '@/components/common/ResearchSection';
-import AchievementsSection from '@/components/common/AchievementsSection';
-
+import React from "react";
+import Cover from "@/components/common/Cover";
+import HODSection from "@/components/common/HODSection";
+import Projects from "@/components/common/Proejcts";
+import FacultySection from "@/components/common/FacultySection";
+import ResearchSection from "@/components/common/ResearchSection";
+import AchievementsSection from "@/components/common/AchievementsSection";
 
 export default function LandingPage() {
   return (
@@ -25,4 +24,4 @@ export default function LandingPage() {
       <Projects />
     </>
   );
-};
+}

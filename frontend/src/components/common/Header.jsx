@@ -7,8 +7,8 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import MakautLogo from "@/assets/common/makaut.png";
-import GuestImg from "@/assets/common/guest.png";
+import MakautLogo from "@/assets/self/makaut.png";
+import GuestImg from "@/assets/self/guest.png";
 
 export default function Header({ user }) {
   const profileImg = user?.img || GuestImg;
