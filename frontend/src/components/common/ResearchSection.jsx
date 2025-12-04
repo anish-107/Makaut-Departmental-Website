@@ -4,20 +4,20 @@ import React from "react";
 const defaultResearch = [
   {
     title: "Intelligent Systems & AI Lab",
-    lead: "Dr. Arjun Sen",
+    lead: "Ms Sayani Manna",
     focus: "Deep learning, computer vision, and intelligent decision systems.",
     tags: ["AI", "Deep Learning", "Computer Vision"],
   },
   {
     title: "Networks & Cyber Security Group",
-    lead: "Dr. Priya Sharma",
+    lead: "Mr. Joy Samadder",
     focus:
       "Secure communication protocols, intrusion detection, and resilient networking.",
     tags: ["Networks", "Security", "IoT"],
   },
   {
     title: "Data Analytics & Cloud Computing Lab",
-    lead: "Mr. Rohan Das",
+    lead: "Dr. Kamarujjaman",
     focus: "Big data analytics, cloud platforms, and scalable systems.",
     tags: ["Big Data", "Cloud", "Analytics"],
   },

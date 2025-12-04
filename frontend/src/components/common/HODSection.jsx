@@ -6,11 +6,11 @@
  */
 
 import "@/index.css";
-import HodImage from "@/assets/Common/hod.jpg";
+import HodImage from "@/assets/Common/hod.png";
 
 export default function HODSection({
   hodImage = HodImage,
-  hodName = "DND - Definitely Not Debashish",
+  hodName = "Dr. Debasis Giri",
   hodTitle = "Head of Department, Information Technology",
   message = "Welcome to the Department of Information Technology. Our department is committed to nurturing the next generation of technology leaders through cutting-edge curriculum, hands-on research opportunities, and industry partnerships. We believe in fostering innovation, critical thinking, and ethical responsibility in all our students. Our faculty comprises distinguished researchers and industry experts who are dedicated to providing world-class education. Together, we strive to push the boundaries of technology and create solutions that make a meaningful impact on society.",
 }) {

@@ -85,7 +85,7 @@ from src.db import (
 
 # Application
 app: Flask = Flask(__name__)
-CORS(app, supports_credentials=True, origins=[getenv("FRONTEND_ORIGIN", "http://localhost:3000")])
+CORS(app, supports_credentials=True)
 
 # Configurations
 load_dotenv()

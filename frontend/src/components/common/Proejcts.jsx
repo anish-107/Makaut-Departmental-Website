@@ -6,40 +6,30 @@
  */
 
 import ProjectCard from "./ProjectCard";
-import Project1 from "@/assets/Common/project1.png";
+import Project1 from "@/assets/Common/project1.jpg";
 import Project2 from "@/assets/Common/project1.png";
-import Project3 from "@/assets/Common/project1.png";
+import Project3 from "@/assets/Common/project1.jpg";
 
 const highlightedProjects = [
   {
-    projectName: "Smart Campus Management System",
-    technology: ["React", "Node.js", "MongoDB", "IoT"],
-    supervisor: "Dr. Sarah Johnson",
-    team: ["Alice Brown", "Bob Wilson", "Charlie Davis"],
-    projectLink: "https://github.com/example/smart-campus",
+    projectName: "Lipspeak : An End to End Deep Learning Model",
+    technology: ["Tensorflow", "Next JS", "Python"],
+    supervisor: "Ms. Sayani Manna",
+    team: ["Anish Kumar","Arpan Haldar" ,"Bidipta Barua", "Dibyasmita Hati"],
+    projectLink: "https://github.com/anish-107/LipSpeak",
     image: Project1,
     description:
-      "An innovative IoT-based solution that automates campus operations including smart lighting, attendance tracking, and resource management. The system uses sensors and machine learning to optimize energy consumption and improve student experience across the campus infrastructure.",
+      "An deep learning model for visual speech recognition.",
   },
   {
     projectName: "AI-Powered Health Diagnosis",
-    technology: ["Python", "TensorFlow", "Flask", "React"],
+    technology: ["Cybersecurity", "Artificial Intelligence", "React"],
     supervisor: "Dr. Michael Chen",
-    team: ["David Lee", "Emma Garcia", "Frank Miller"],
-    projectLink: "https://github.com/example/health-ai",
+    team: ["Rupam Bhadra", "Antika Halder", "Deep Ghosh", "Srijeeb Naskar"],
+    projectLink: "https://github.com/example/phising",
     image: Project2,
     description:
-      "A machine learning application that assists healthcare professionals in diagnosing diseases from medical imaging. Using deep learning models trained on thousands of X-rays and MRI scans, the system provides accurate preliminary diagnoses to support medical decision-making.",
-  },
-  {
-    projectName: "Blockchain-Based Voting System",
-    technology: ["Solidity", "Ethereum", "Next.js", "Web3"],
-    supervisor: "Dr. Emily Watson",
-    team: ["Grace Kim", "Henry Zhang", "Ivy Patel"],
-    projectLink: "https://github.com/example/blockchain-voting",
-    image: Project3,
-    description:
-      "A secure and transparent electronic voting platform built on blockchain technology. This system ensures vote integrity, prevents tampering, and provides real-time auditing capabilities while maintaining voter privacy through advanced cryptographic techniques.",
+      "AI Based phising detection.",
   },
 ];
 

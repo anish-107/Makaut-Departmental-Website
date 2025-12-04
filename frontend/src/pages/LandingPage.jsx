@@ -13,6 +13,7 @@ import FacultySection from '@/components/common/FacultySection';
 import ResearchSection from '@/components/common/ResearchSection';
 import AchievementsSection from '@/components/common/AchievementsSection';
 
+
 export default function LandingPage() {
   return (
     <>

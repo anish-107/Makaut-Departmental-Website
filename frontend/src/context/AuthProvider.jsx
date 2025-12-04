@@ -1,13 +1,7 @@
-/** AuthProvider.jsx 
- * @author Anish
- * @description This file returns the Auth Context Component
- * @date 2/12/2025
- * @returns a JSX component for providing authorization
-*/
-
-
+// AuthProvider.jsx
 import { useEffect, useState } from "react";
 import { AuthContext } from "./auth-context";
+import { getRefreshCsrfToken } from "@/utils/csrf";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "";
@@ -21,12 +15,45 @@ export default function AuthProvider({ children }) {
 
     async function fetchMe() {
       try {
-        setLoading(true);
+        if (!cancelled) setLoading(true);
 
-        const res = await fetch(`${API_BASE_URL}/auth/me`, {
+        // first attempt
+        let res = await fetch(`${API_BASE_URL}/auth/me`, {
           method: "GET",
           credentials: "include",
         });
+
+        // if access token expired or missing -> try to refresh (POST /auth/refresh)
+        if (res.status === 401) {
+          try {
+            const csrf = getRefreshCsrfToken();
+            const refreshHeaders = csrf
+              ? { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf }
+              : { "Content-Type": "application/json" };
+
+            const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+              method: "POST",
+              credentials: "include",
+              headers: refreshHeaders,
+            });
+
+            if (refreshRes.ok) {
+              // retry /auth/me once
+              res = await fetch(`${API_BASE_URL}/auth/me`, {
+                method: "GET",
+                credentials: "include",
+              });
+            } else {
+              // refresh failed -> treat as logged out
+              if (!cancelled) setUser(null);
+              return;
+            }
+          } catch (err) {
+            console.error("Refresh failed:", err);
+            if (!cancelled) setUser(null);
+            return;
+          }
+        }
 
         if (!res.ok) {
           if (!cancelled) setUser(null);
@@ -47,8 +74,12 @@ export default function AuthProvider({ children }) {
 
     fetchMe();
 
+    // re-check every 5 minutes (optional) to keep UI synced — you can remove this if unwanted
+    const interval = setInterval(fetchMe, 5 * 60 * 1000);
+
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, []);
 
